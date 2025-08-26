@@ -61,8 +61,8 @@ export default function ClassificationRulesPage() {
       const propertiesRes = await api.get("/properties");
       setProperties(propertiesRes.data);
 
-      // Load rules
-      const rulesRes = await api.get("/classification-rules");
+      // Load rules - FIXED: use trailing slash
+      const rulesRes = await api.get("/classification-rules/");
       
       // Enrich rules with property info
       const enrichedRules = rulesRes.data.map((rule: ClassificationRule) => {
@@ -99,7 +99,7 @@ export default function ClassificationRulesPage() {
         tenant_name: newRule.tenant_name || undefined
       };
 
-      await api.post("/classification-rules", ruleData);
+      await api.post("/classification-rules/", ruleData);
       
       setShowNewRuleModal(false);
       setNewRule({

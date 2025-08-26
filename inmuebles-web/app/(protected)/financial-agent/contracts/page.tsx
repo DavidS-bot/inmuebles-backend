@@ -100,7 +100,7 @@ export default function RentalContractsPage() {
       setProperties(propertiesRes.data);
 
       // Load contracts
-      const contractsRes = await api.get("/rental-contracts");
+      const contractsRes = await api.get("/rental-contracts/");
       
       // Enrich contracts with property info
       const enrichedContracts = contractsRes.data.map((contract: RentalContract) => {
@@ -130,7 +130,7 @@ export default function RentalContractsPage() {
         end_date: newContract.end_date || undefined
       };
 
-      await api.post("/rental-contracts", contractData);
+      await api.post("/rental-contracts/", contractData);
       
       setShowNewContractModal(false);
       setNewContract({
@@ -201,7 +201,7 @@ export default function RentalContractsPage() {
       await loadData();
       
       // Find and update the selected contract
-      const updatedContracts = await api.get("/rental-contracts");
+      const updatedContracts = await api.get("/rental-contracts/");
       const updatedContract = updatedContracts.data.find((c: RentalContract) => c.id === selectedContract.id);
       if (updatedContract) {
         const property = properties.find(p => p.id === updatedContract.property_id);

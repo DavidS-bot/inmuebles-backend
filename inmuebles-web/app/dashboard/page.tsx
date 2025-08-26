@@ -91,11 +91,11 @@ export default function DashboardPage() {
         }
       }
 
-      // Load mortgages for debt
+      // Load mortgages for debt - FIXED: use trailing slash endpoint
       try {
         const mortgagesRes = await api.get("/mortgage-details/");
         totalDebt = mortgagesRes.data.reduce((sum: number, m: any) => sum + (m.outstanding_balance || 0), 0);
-        console.log(`Loaded ${mortgagesRes.data.length} mortgages, total debt: ${totalDebt}`);
+        console.log(`FIXED: Loaded ${mortgagesRes.data.length} mortgages, total debt: ${totalDebt}`);
       } catch (e) {
         console.log("Could not load mortgages:", e);
       }

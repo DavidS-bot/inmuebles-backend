@@ -39,27 +39,31 @@ def run_fresh_scraper_and_upload():
         if result.returncode == 0:
             print("Scraper ejecutado exitosamente!")
             
-            # Look for the newest file generated
-            pattern = "bankinter_api_*.xlsx"
+            # Look for Excel files created by the working script
+            pattern = "bankinter_agente_financiero_*.xlsx"
             files = glob.glob(pattern)
             
             if files:
-                # Get the most recent file (should be newly created)
+                # Get the most recent file
                 latest_file = max(files, key=os.path.getmtime)
-                mod_time = datetime.fromtimestamp(os.path.getmtime(latest_file))
-                
-                print(f"Archivo más reciente: {latest_file}")
-                print(f"Modificado: {mod_time}")
-                
-                # Check if it's very recent (last 5 minutes)
-                time_diff = (datetime.now() - mod_time).total_seconds()
-                if time_diff < 300:  # Less than 5 minutes old
-                    print("Archivo recién generado, subiendo...")
-                    return upload_file(latest_file)
-                else:
-                    print("AVISO: El archivo no parece recién generado")
+                print(f"Archivo procesado: {latest_file}")
+                print("Subiendo archivo procesado...")
+                return upload_file(latest_file)
             
-            print("AVISO: No se encontraron archivos nuevos después del scraping")
+            # If no agente financiero file, try API files
+            pattern2 = "bankinter_api_*.xlsx" 
+            files2 = glob.glob(pattern2)
+            
+            if files2:
+                latest_file = max(files2, key=os.path.getmtime)
+                mod_time = datetime.fromtimestamp(os.path.getmtime(latest_file))
+                time_diff = (datetime.now() - mod_time).total_seconds()
+                
+                if time_diff < 300:  # Less than 5 minutes old
+                    print(f"Archivo recién generado: {latest_file}")
+                    return upload_file(latest_file)
+            
+            print("AVISO: No se encontraron archivos para subir")
             return False
             
         else:

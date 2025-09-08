@@ -261,7 +261,7 @@ export default function MovementsTab() {
         
         // Ejecutar el script real de Python
         try {
-          const result = await fetch('http://localhost:8000/run-scraper', {
+          const result = await fetch('http://localhost:8003/run-scraper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
           });

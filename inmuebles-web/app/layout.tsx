@@ -15,16 +15,16 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#14b8a6',
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#3498db',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>
-        <meta name="theme-color" content="#14b8a6" />
+        <meta name="theme-color" content="#3498db" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Inmuebles" />
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png" />
       </head>
-      <body className="min-h-screen bg-teal-500 text-gray-900">
+      <body className="min-h-screen bg-gray-50 text-gray-900">
         <ClientInit />
         {children}
       </body>

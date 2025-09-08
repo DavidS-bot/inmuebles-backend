@@ -1,0 +1,233 @@
+[
+  {
+    "alertId": "alert_1755983262245",
+    "timestamp": "2025-08-23T21:07:42.338Z",
+    "propertiesFound": 2,
+    "properties": [
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559832623320.06627867654129393"
+      },
+      {
+        "title": "Piso económico para reformar",
+        "price": "58.000€ (829€/m²)",
+        "details": "2 hab, 70m², 1 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock005",
+        "id": "parsed_17559832623330.0008522780296154053"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983262245",
+    "timestamp": "2025-08-23T21:09:20.379Z",
+    "propertiesFound": 2,
+    "properties": [
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833603770.399190527401059"
+      },
+      {
+        "title": "Piso económico para reformar",
+        "price": "58.000€ (829€/m²)",
+        "details": "2 hab, 70m², 1 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock005",
+        "id": "parsed_17559833603770.07437757992155425"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360283",
+    "timestamp": "2025-08-23T21:09:20.385Z",
+    "propertiesFound": 1,
+    "properties": [
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833603840.8018164301626944"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360303",
+    "timestamp": "2025-08-23T21:09:20.389Z",
+    "propertiesFound": 4,
+    "properties": [
+      {
+        "title": "Apartamento moderno zona Universidad",
+        "price": "95.000€ (1397€/m²)",
+        "details": "2 hab, 68m², 2 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock002",
+        "id": "parsed_17559833603870.9156118874313584"
+      },
+      {
+        "title": "Moderno apartamento Zona Comercial",
+        "price": "105.000€ (1346€/m²)",
+        "details": "2 hab, 78m², 2 baños",
+        "link": "https://www.idealista.com/inmueble/mock006",
+        "id": "parsed_17559833603870.8226712894335957"
+      },
+      {
+        "title": "Piso en Centro histórico, Jerez de la Frontera",
+        "price": "89.000€ (1187€/m²)",
+        "details": "2 hab, 75m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock001",
+        "id": "parsed_17559833603870.4553929923197395"
+      },
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833603870.5360880117868034"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360305",
+    "timestamp": "2025-08-23T21:09:20.392Z",
+    "propertiesFound": 1,
+    "properties": [
+      {
+        "title": "Moderno apartamento Zona Comercial",
+        "price": "105.000€ (1346€/m²)",
+        "details": "2 hab, 78m², 2 baños",
+        "link": "https://www.idealista.com/inmueble/mock006",
+        "id": "parsed_17559833603910.3158297154368157"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983262245",
+    "timestamp": "2025-08-23T21:09:20.398Z",
+    "propertiesFound": 2,
+    "properties": [
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833603970.5668408018449429"
+      },
+      {
+        "title": "Piso económico para reformar",
+        "price": "58.000€ (829€/m²)",
+        "details": "2 hab, 70m², 1 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock005",
+        "id": "parsed_17559833603970.4178073011340071"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360283",
+    "timestamp": "2025-08-23T21:09:20.401Z",
+    "propertiesFound": 1,
+    "properties": [
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833604000.9896199734627098"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360303",
+    "timestamp": "2025-08-23T21:09:20.404Z",
+    "propertiesFound": 4,
+    "properties": [
+      {
+        "title": "Apartamento moderno zona Universidad",
+        "price": "95.000€ (1397€/m²)",
+        "details": "2 hab, 68m², 2 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock002",
+        "id": "parsed_17559833604030.5723619485012017"
+      },
+      {
+        "title": "Moderno apartamento Zona Comercial",
+        "price": "105.000€ (1346€/m²)",
+        "details": "2 hab, 78m², 2 baños",
+        "link": "https://www.idealista.com/inmueble/mock006",
+        "id": "parsed_17559833604030.6566161847552241"
+      },
+      {
+        "title": "Piso en Centro histórico, Jerez de la Frontera",
+        "price": "89.000€ (1187€/m²)",
+        "details": "2 hab, 75m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock001",
+        "id": "parsed_17559833604030.1838510136611744"
+      },
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559833604030.534843094610737"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983360305",
+    "timestamp": "2025-08-23T21:09:20.407Z",
+    "propertiesFound": 1,
+    "properties": [
+      {
+        "title": "Moderno apartamento Zona Comercial",
+        "price": "105.000€ (1346€/m²)",
+        "details": "2 hab, 78m², 2 baños",
+        "link": "https://www.idealista.com/inmueble/mock006",
+        "id": "parsed_17559833604060.9348118643758985"
+      }
+    ]
+  },
+  {
+    "alertId": "alert_1755983819552",
+    "timestamp": "2025-08-23T21:16:59.612Z",
+    "propertiesFound": 5,
+    "properties": [
+      {
+        "title": "Apartamento moderno zona Universidad",
+        "price": "95.000€ (1397€/m²)",
+        "details": "2 hab, 68m², 2 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock002",
+        "id": "parsed_17559838196090.9640209429642466"
+      },
+      {
+        "title": "Piso en Centro histórico, Jerez de la Frontera",
+        "price": "89.000€ (1187€/m²)",
+        "details": "2 hab, 75m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock001",
+        "id": "parsed_17559838196090.31944752443000746"
+      },
+      {
+        "title": "Piso luminoso en Barrio de Santiago",
+        "price": "72.000€ (878€/m²)",
+        "details": "2 hab, 82m², 1 baños",
+        "link": "https://www.idealista.com/inmueble/mock003",
+        "id": "parsed_17559838196090.8699431986197574"
+      },
+      {
+        "title": "Piso con terraza en La Plata",
+        "price": "88.000€ (1100€/m²)",
+        "details": "2 hab, 80m², 1 baños",
+        "link": "https://www.pisos.com/inmueble/mock007",
+        "id": "parsed_17559838196090.8930556084610948"
+      },
+      {
+        "title": "Piso económico para reformar",
+        "price": "58.000€ (829€/m²)",
+        "details": "2 hab, 70m², 1 baños",
+        "link": "https://www.fotocasa.es/inmueble/mock005",
+        "id": "parsed_17559838196090.6905465772950243"
+      }
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+PLACEHOLDER: Reglas Específicas de Propiedad
+Descripción: Configuración de reglas particulares para la propiedad
+Archivo esperado: 18_reglas_propiedad.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

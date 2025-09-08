@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: inmuebles-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: '["https://*.onrender.com"]'
+
+  - type: pserv
+    name: inmuebles-db
+    env: postgresql
+    plan: starter
+    
+  - type: web  
+    name: inmuebles-web
+    env: node
+    buildCommand: cd inmuebles-web && npm ci && npm run build
+    startCommand: cd inmuebles-web && npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://inmuebles-api.onrender.com/api
+      - key: NEXTAUTH_URL
+        value: https://inmuebles-web.onrender.com
+      - key: NEXTAUTH_SECRET
+        sync: false

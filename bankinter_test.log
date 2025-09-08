@@ -1,0 +1,15 @@
+2025-08-28 02:33:07,484 - INFO - ====== WebDriver manager ======
+2025-08-28 02:33:09,393 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:10,068 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:10,317 - INFO - There is no [win64] chromedriver "139.0.7258.154" for browser google-chrome "139.0.7258" in cache
+2025-08-28 02:33:10,318 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:11,141 - INFO - WebDriver version 139.0.7258.154 selected
+2025-08-28 02:33:11,146 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.154/win32/chromedriver-win32.zip
+2025-08-28 02:33:11,146 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.154/win32/chromedriver-win32.zip
+2025-08-28 02:33:13,901 - INFO - Driver downloading response is 200
+2025-08-28 02:33:20,728 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:22,742 - INFO - Driver has been saved in cache [C:\Users\davsa\.wdm\drivers\chromedriver\win64\139.0.7258.154]
+2025-08-28 02:33:54,725 - INFO - ====== WebDriver manager ======
+2025-08-28 02:33:56,112 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:56,535 - INFO - Get LATEST chromedriver version for google-chrome
+2025-08-28 02:33:56,868 - INFO - Driver [C:\Users\davsa\.wdm\drivers\chromedriver\win64\139.0.7258.154\chromedriver-win32/chromedriver.exe] found in cache

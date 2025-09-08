@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PWA - Inmuebles</title>
+    <link rel="manifest" href="http://localhost:3000/manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>PWA Testing - Inmuebles App</h1>
+    
+    <h2>Test Results:</h2>
+    <div id="results"></div>
+    
+    <h2>Manual Tests:</h2>
+    <ul>
+        <li>Open Chrome DevTools → Application → Manifest (should show app info)</li>
+        <li>Open Chrome DevTools → Application → Service Workers (should show registered SW)</li>
+        <li>Go to localhost:3000 and check for install prompt</li>
+        <li>Test offline functionality by going offline in DevTools</li>
+    </ul>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(message, type) {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+
+        // Test Service Worker support
+        if ('serviceWorker' in navigator) {
+            addResult('✓ Service Worker is supported', 'success');
+            
+            // Test manifest
+            fetch('http://localhost:3000/manifest.json')
+                .then(response => {
+                    if (response.ok) {
+                        addResult('✓ Manifest is accessible', 'success');
+                        return response.json();
+                    } else {
+                        throw new Error('Manifest not accessible');
+                    }
+                })
+                .then(manifest => {
+                    addResult(`✓ Manifest loaded: ${manifest.name}`, 'success');
+                })
+                .catch(error => {
+                    addResult(`✗ Manifest error: ${error.message}`, 'error');
+                });
+            
+            // Test Service Worker
+            fetch('http://localhost:3000/sw.js')
+                .then(response => {
+                    if (response.ok) {
+                        addResult('✓ Service Worker file is accessible', 'success');
+                    } else {
+                        throw new Error('Service Worker not accessible');
+                    }
+                })
+                .catch(error => {
+                    addResult(`✗ Service Worker error: ${error.message}`, 'error');
+                });
+            
+            // Test icons
+            const testIcon = 'http://localhost:3000/icons/icon-192x192.png';
+            fetch(testIcon)
+                .then(response => {
+                    if (response.ok) {
+                        addResult('✓ PWA icons are accessible', 'success');
+                    } else {
+                        throw new Error('Icons not accessible');
+                    }
+                })
+                .catch(error => {
+                    addResult(`✗ Icons error: ${error.message}`, 'error');
+                });
+                
+        } else {
+            addResult('✗ Service Worker is not supported', 'error');
+        }
+
+        // Test beforeinstallprompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            addResult('✓ Install prompt is available', 'success');
+            deferredPrompt = e;
+        });
+
+        // Test if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            addResult('✓ App is running in standalone mode (installed)', 'success');
+        } else {
+            addResult('ℹ App is running in browser mode (not installed)', 'info');
+        }
+
+        // Test network status
+        if (navigator.onLine) {
+            addResult('✓ Currently online', 'success');
+        } else {
+            addResult('ℹ Currently offline', 'info');
+        }
+
+        setTimeout(() => {
+            addResult('PWA basic tests completed. Check manual tests above.', 'info');
+        }, 2000);
+    </script>
+</body>
+</html>

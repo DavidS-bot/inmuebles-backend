@@ -23,7 +23,7 @@ export default function ResponsiveLayout({
 }: ResponsiveLayoutProps) {
   return (
     <NavigationProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen min-h-[100dvh] bg-gray-50">
         {/* Desktop Sidebar */}
         <Sidebar />
         

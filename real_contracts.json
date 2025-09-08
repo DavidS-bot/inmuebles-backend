@@ -1,0 +1,173 @@
+[
+  {
+    "tenant": "Maria Hidalgo Llorca / Jose Antonio Becerra Toro",
+    "rent": 800.0,
+    "deposit": 800.0,
+    "start": "2023-12-16",
+    "active": true,
+    "property": " Jose Luis Lopez de Aranguren 22, Jerez de la Frontera",
+    "pdf": "Contrato de arrendamiento de vivienda habitual. Aranguren, 22. J. Antonio y Maria. 16-12-2023.pdf"
+  },
+  {
+    "tenant": "Álvaro Manuel Bohórquez Heredia",
+    "rent": 1000.0,
+    "deposit": 1000.0,
+    "start": "2025-06-14",
+    "active": true,
+    "property": " Jose Luis Lopez de Aranguren 22, Jerez de la Frontera",
+    "pdf": "Alvaro. Contrato de arrendamiento de vivienda habitual. Aranguren, nº 22. 14 de Junio 2025. (2).pdf"
+  },
+  {
+    "tenant": "Leandro Emanuel Afonso Martins",
+    "rent": 900.0,
+    "deposit": 900.0,
+    "start": "2025-02-24",
+    "active": true,
+    "property": "Calle Seneca (San Isidro Guadalete), S/N, 1, B, 11594, Jerez De La Frontera",
+    "pdf": "Contrato de Arrendamiento. D. Leandro Emanuel. Pozoalbero. 24-02-25.pdf"
+  },
+  {
+    "tenant": "Sergio Bravo Bañasco",
+    "rent": 900.0,
+    "deposit": 900.0,
+    "start": "2024-02-25",
+    "active": true,
+    "property": "Calle Seneca (San Isidro Guadalete), S/N, 1, B, 11594, Jerez De La Frontera",
+    "pdf": "Contrato de arrendamiento habitual. Piso Pozoalbero. Sergio Bravo Bañasco. 25 de Febrero´24.pdf"
+  },
+  {
+    "tenant": "Jorge Rodriguez Moreno / Susana Peculo Camacho",
+    "rent": 800.0,
+    "deposit": 800.0,
+    "start": "2022-06-30",
+    "active": true,
+    "property": "Jose Luis Lopez de Aranguren 66, Jerez de la Frontera",
+    "pdf": "Contrato de arrendamiento Susana y Jorge. Aranguren, 66. 30 de Junio 2022. Firmado.pdf"
+  },
+  {
+    "tenant": "Rocio Soto Zuñiga",
+    "rent": 800.0,
+    "deposit": 800.0,
+    "start": "2022-11-18",
+    "active": true,
+    "property": "Jose Luis Lopez de Aranguren 68, Jerez de la Frontera",
+    "pdf": "Contrato de Rocío. Aranguren, 68. 18 de Noviembre 2022.pdf"
+  },
+  {
+    "tenant": "Daniel Vázquez Jurado y Sara Georgiana Sociu",
+    "rent": 700.0,
+    "deposit": 700.0,
+    "start": "2025-08-04",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 4, 11406, Jerez De La Frontera",
+    "pdf": null
+  },
+  {
+    "tenant": "Roberto Hernández Plaza y Kerthyns Yaney del Carmen Cavadia González",
+    "rent": 650.0,
+    "deposit": 650.0,
+    "start": "2025-01-17",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 4, 11406, Jerez De La Frontera",
+    "pdf": "Contrato arrendamiento Roberto y Kerthyns. Lago de Enol, 1. Bloque 2. Bajo n.4 (17-01-2025).pdf"
+  },
+  {
+    "tenant": "Manuela Giraldo Mejia",
+    "rent": 550.0,
+    "deposit": 550.0,
+    "start": "2023-06-15",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 4, 11406, Jerez De La Frontera",
+    "pdf": "Contrato de arrendamiento de vivienda habitual. Manuela. Bloque 2. Bajo 4 Firmado 15-06-2023.pdf"
+  },
+  {
+    "tenant": "Judit Torres Castillo",
+    "rent": 650.0,
+    "deposit": 650.0,
+    "start": "2024-10-22",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 4, 11406, Jerez De La Frontera",
+    "pdf": "Contrato arrendamiento. Judit. Lago de Enol. Bloque 2. Bajo n. 4. 22 de Octubre 2024. (firmado).pdf"
+  },
+  {
+    "tenant": "Jesus Javier Rodriguez y Josefa Roman Millan",
+    "rent": 600.0,
+    "deposit": 600.0,
+    "start": "2023-07-15",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 9, 11406, Jerez De La Frontera",
+    "pdf": "Contrato de arrendamiento FIRMADO. D. Jesús Javier y Carolina Olalla. Lago de Enol. Bloque 2. 1 P. Vivienda nº 9. Jerez.29-07-2023.docx.pdf"
+  },
+  {
+    "tenant": "Lucia Marin Chia y Fernando Marin Carrascal",
+    "rent": 650.0,
+    "deposit": 650.0,
+    "start": "2025-05-02",
+    "active": true,
+    "property": "Lago de Bañolas, nº 1, puerta 9, 11406, Jerez De La Frontera",
+    "pdf": "Contrato de arrendamiento Lucia. Lago de Enol, 2. 2ª planta. Número 9. (02-05-25).pdf"
+  },
+  {
+    "tenant": "Judit Torres Castillo y Jesus García Baena",
+    "rent": 750.0,
+    "deposit": 750.0,
+    "start": "2025-01-12",
+    "active": true,
+    "property": "Lago de Enol, bloque 1, planta primera, puerta F, 11406, Jerez De La Frontera",
+    "pdf": "Contrato arrendamiento Judit y Jesús. Lago de Enol, 1. P. 1-1F. (12-01-25).pdf"
+  },
+  {
+    "tenant": "Antonio Jose Lopez Acuña Herrero",
+    "rent": 650.0,
+    "deposit": 650.0,
+    "start": "2023-06-11",
+    "active": true,
+    "property": "Lago de Enol, bloque 1, planta segunda, puerta A, 11406, Jerez De La Frontera",
+    "pdf": "Contrato de arrendamiento. Antonio. P. 1. Planta 2. Letra A 11-06-23.pdf"
+  },
+  {
+    "tenant": "Cliff Grossman Llebaria",
+    "rent": 700.0,
+    "deposit": 700.0,
+    "start": "2025-05-28",
+    "active": true,
+    "property": "Lago de Enol, bloque 1, planta segunda, puerta B, 11406, Jerez De La Frontera",
+    "pdf": "CONTRA_1.PDF"
+  },
+  {
+    "tenant": "Manuel Orellana Badillo",
+    "rent": 650.0,
+    "deposit": 650.0,
+    "start": "2024-08-27",
+    "active": true,
+    "property": "Lago de Enol, sin número, puerta G, 11406, Jerez De La Frontera",
+    "pdf": "Contrato arrendamiento Manuel Orellana. Lago de Enol, 1. P1. 1ºG. (27-08-24).pdf"
+  },
+  {
+    "tenant": "Manuel Avalos Fuentes y Eva María Montaño Sánchez",
+    "rent": 700.0,
+    "deposit": 700.0,
+    "start": "2025-07-01",
+    "active": true,
+    "property": "Lago de Enol, sin número, puerta G, 11406, Jerez De La Frontera",
+    "pdf": "Eva y Manuel. Contrato arrendamiento. Lago de Enol. 1-1G. 01-07-25.pdf"
+  },
+  {
+    "tenant": "Antonio Rashad Hanson / Olga Ventrone",
+    "rent": 1300.0,
+    "deposit": 1300.0,
+    "start": "2024-04-22",
+    "active": true,
+    "property": "Platon 30, Jerez de la Frontera",
+    "pdf": "Draft Lease Contract EN_SP Antonio-Olga. Calle Platón, 30. Jerez de la Fra. Cádiz. - Signed DSR.pdf"
+  },
+  {
+    "tenant": "Diego Ribera Ramirez",
+    "rent": 1100.0,
+    "deposit": 1100.0,
+    "start": "2022-07-01",
+    "active": true,
+    "property": "Platon 30, Jerez de la Frontera",
+    "pdf": "Contrato Diego y Soledad. Platón, 30. 1 de Julio del 2022 FIRMADO.pdf"
+  }
+]

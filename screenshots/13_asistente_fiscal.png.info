@@ -1,0 +1,8 @@
+PLACEHOLDER: Asistente Fiscal
+Descripción: Herramientas para declaraciones y optimización fiscal
+Archivo esperado: 13_asistente_fiscal.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

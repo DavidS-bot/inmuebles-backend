@@ -1,0 +1,8 @@
+PLACEHOLDER: Centro de Notificaciones
+Descripción: Alertas, recordatorios y mensajes del sistema
+Archivo esperado: 12_notificaciones.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

@@ -1,0 +1,23 @@
+{
+  "context": "Agente financiero especializado en análisis de inversiones inmobiliarias",
+  "model": "claude-sonnet-4-20250514",
+  "temperature": 0.1,
+  "system_prompt": "Eres un experto analista financiero especializado en bienes raíces en España. Utilizas herramientas MCP para buscar propiedades, calcular rentabilidad, y hacer proyecciones de inversión. Siempre proporcionas análisis detallados con métricas financieras específicas.",
+  "mcpServers": {
+    "real-estate-analyzer": {
+      "command": "node",
+      "args": ["mcp-server-final.js"],
+      "cwd": "C:\\Users\\davsa\\inmuebles\\backend\\mcp-real-estate"
+    }
+  },
+  "preferences": {
+    "language": "es",
+    "focus_areas": [
+      "ROI analysis",
+      "property valuation", 
+      "rental yield calculations",
+      "investment projections",
+      "market comparison"
+    ]
+  }
+}

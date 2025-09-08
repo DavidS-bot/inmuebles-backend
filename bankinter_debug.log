@@ -1,0 +1,30 @@
+2025-08-22 22:37:44.863206: START INICIANDO authenticate_web()
+2025-08-22 22:44:56.912237: START INICIANDO authenticate_web()
+2025-08-22 22:45:00.298711: LOADING WebDriver configurado, navegando a URL
+2025-08-22 22:45:05.017898: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 22:46:02.750484: START INICIANDO authenticate_web()
+2025-08-22 22:46:05.773758: LOADING WebDriver configurado, navegando a URL
+2025-08-22 22:46:10.121368: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 22:47:05.811693: START INICIANDO authenticate_web()
+2025-08-22 22:47:08.994191: LOADING WebDriver configurado, navegando a URL
+2025-08-22 22:47:12.850928: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 22:48:12.683058: START INICIANDO authenticate_web()
+2025-08-22 22:48:16.550616: LOADING WebDriver configurado, navegando a URL
+2025-08-22 22:48:18.843916: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 22:49:10.525914: START INICIANDO authenticate_web()
+2025-08-22 22:49:14.153376: LOADING WebDriver configurado, navegando a URL
+2025-08-22 22:49:21.810735: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 23:06:11.377987: START INICIANDO authenticate_web()
+2025-08-22 23:06:16.128852: LOADING WebDriver configurado, navegando a URL
+2025-08-22 23:06:22.602616: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-22 23:07:37.416672: START INICIANDO authenticate_web()
+2025-08-22 23:07:42.355074: LOADING WebDriver configurado, navegando a URL
+2025-08-22 23:07:46.925667: PAGE Navegando a: https://bancaonline.bankinter.com/gestion/login.xhtml
+2025-08-23 00:20:47.584710: ENDPOINT: Iniciando web scraping
+2025-08-23 00:21:46.540494: ENDPOINT: Web scraping termin[INFO] con [INFO]xito: True
+2025-08-23 01:18:35.757727: ENDPOINT: Iniciando web scraping
+2025-08-23 01:18:59.164531: ENDPOINT: Web scraping termin[INFO] con [INFO]xito: True
+2025-08-23 01:39:37.898697: ENDPOINT: Iniciando web scraping
+2025-08-23 01:40:00.801083: ENDPOINT: Web scraping termin[INFO] con [INFO]xito: True
+2025-08-23 09:52:49.682652: ENDPOINT: Iniciando web scraping
+2025-08-23 09:53:14.818105: ENDPOINT: Web scraping termin[INFO] con [INFO]xito: True

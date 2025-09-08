@@ -4,6 +4,7 @@
   "description": "Aplicación profesional para gestión de propiedades inmobiliarias",
   "start_url": "/",
   "display": "standalone",
+  "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes",
   "background_color": "#f5f5f5",
   "theme_color": "#3498db",
   "orientation": "portrait-primary",

@@ -2,17 +2,81 @@
 from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 from pydantic import BaseModel
 import pandas as pd
 import io
 from datetime import datetime
+import re
 
 from ..db import get_session
 from ..deps import get_current_user
 from ..models import User, Property, FinancialMovement, ClassificationRule
 
 router = APIRouter(prefix="/financial-movements", tags=["financial-movements"])
+
+# Helper functions for parsing European formats
+def parse_european_date(date_str):
+    """Parse date in DD/MM/YYYY format"""
+    try:
+        if pd.isna(date_str) or date_str == "":
+            return None
+        
+        # If it's already a datetime object
+        if hasattr(date_str, 'date'):
+            return date_str.date()
+        
+        date_str = str(date_str).strip()
+        if not date_str:
+            return None
+        
+        # Try different date formats
+        date_formats = ['%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d', '%m/%d/%Y']
+        
+        for fmt in date_formats:
+            try:
+                return datetime.strptime(date_str, fmt).date()
+            except ValueError:
+                continue
+        
+        return None
+    except Exception as e:
+        print(f"ERROR in parse_european_date: {e} for input: {date_str}")
+        return None
+
+def parse_european_amount(amount_str):
+    """Parse amount in European format: -70,00 € or 1.234,56 €"""
+    try:
+        if pd.isna(amount_str):
+            return None
+        
+        # If it's already a number
+        if isinstance(amount_str, (int, float)):
+            return float(amount_str)
+        
+        amount_str = str(amount_str).strip()
+        if not amount_str:
+            return None
+        
+        # Remove currency symbols and whitespace
+        amount_str = re.sub(r'[€$£¥]', '', amount_str).strip()
+        
+        # Handle European number format (comma as decimal separator)
+        # Examples: "1.234,56" -> "1234.56", "-70,00" -> "-70.00"
+        
+        # If there are both dots and commas, assume dot is thousands separator
+        if '.' in amount_str and ',' in amount_str:
+            # European format: 1.234,56 -> 1234.56
+            amount_str = amount_str.replace('.', '').replace(',', '.')
+        elif ',' in amount_str:
+            # Only comma present, assume it's decimal separator
+            amount_str = amount_str.replace(',', '.')
+        
+        return float(amount_str)
+    except Exception as e:
+        print(f"ERROR in parse_european_amount: {e} for input: {amount_str}")
+        return None
 
 # Pydantic models para request/response
 class FinancialMovementCreate(BaseModel):
@@ -55,6 +119,7 @@ def get_financial_movements(
     category: Optional[str] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    unassigned_only: Optional[bool] = None,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
@@ -65,20 +130,28 @@ def get_financial_movements(
     ).all()
     property_ids = [prop.id for prop in user_properties]
     
-    # Include both movements assigned to user properties AND unassigned movements for the user
-    if property_ids:
-        query = select(FinancialMovement).where(
-            (FinancialMovement.property_id.in_(property_ids)) |
-            ((FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id))
-        )
-    else:
-        # If user has no properties, only show their unassigned movements
+    # Handle unassigned_only filter first
+    if unassigned_only:
+        # Only show unassigned movements for the user
         query = select(FinancialMovement).where(
             (FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id)
         )
+    else:
+        # Include both movements assigned to user properties AND unassigned movements for the user
+        if property_ids:
+            query = select(FinancialMovement).where(
+                (FinancialMovement.property_id.in_(property_ids)) |
+                ((FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id))
+            )
+        else:
+            # If user has no properties, only show their unassigned movements
+            query = select(FinancialMovement).where(
+                (FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id)
+            )
+        
+        if property_id:
+            query = query.where(FinancialMovement.property_id == property_id)
     
-    if property_id:
-        query = query.where(FinancialMovement.property_id == property_id)
     if category:
         query = query.where(FinancialMovement.category == category)
     if start_date:
@@ -88,67 +161,6 @@ def get_financial_movements(
     
     movements = session.exec(query).all()
     return movements
-
-@router.post("/", response_model=FinancialMovementResponse)
-def create_financial_movement(
-    movement_data: FinancialMovementCreate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Create a new financial movement"""
-    # Verify property ownership
-    property_obj = session.get(Property, movement_data.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Property not found")
-    
-    movement = FinancialMovement(**movement_data.dict())
-    session.add(movement)
-    session.commit()
-    session.refresh(movement)
-    return movement
-
-@router.get("/{movement_id}", response_model=FinancialMovementResponse)
-def get_financial_movement(
-    movement_id: int,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Get a specific financial movement"""
-    movement = session.get(FinancialMovement, movement_id)
-    if not movement:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Verify ownership through property
-    property_obj = session.get(Property, movement.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    return movement
-
-@router.put("/{movement_id}", response_model=FinancialMovementResponse)
-def update_financial_movement(
-    movement_id: int,
-    movement_data: FinancialMovementUpdate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Update a financial movement"""
-    movement = session.get(FinancialMovement, movement_id)
-    if not movement:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Verify ownership
-    property_obj = session.get(Property, movement.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Update fields
-    for field, value in movement_data.dict(exclude_unset=True).items():
-        setattr(movement, field, value)
-    
-    session.commit()
-    session.refresh(movement)
-    return movement
 
 @router.post("/bulk-delete")
 def delete_all_movements_bulk(
@@ -196,7 +208,142 @@ def delete_all_movements_bulk(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting movements: {str(e)}")
 
-@router.post("/bulk-delete-by-date")
+@router.get("/download-xlsx")
+def export_movements_to_excel(
+    property_id: Optional[int] = None,
+    category: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Export financial movements to Excel file"""
+    try:
+        # Get user's property IDs for filtering
+        user_properties = session.exec(
+            select(Property).where(Property.owner_id == current_user.id)
+        ).all()
+        property_ids = [prop.id for prop in user_properties]
+        
+        # Build the same query as the GET endpoint
+        if property_ids:
+            query = select(FinancialMovement).where(
+                (FinancialMovement.property_id.in_(property_ids)) |
+                ((FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id))
+            )
+        else:
+            # If user has no properties, only show their unassigned movements
+            query = select(FinancialMovement).where(
+                (FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id)
+            )
+        
+        # Apply filters
+        if property_id:
+            query = query.where(FinancialMovement.property_id == property_id)
+        if category:
+            query = query.where(FinancialMovement.category == category)
+        if start_date:
+            query = query.where(FinancialMovement.date >= start_date)
+        if end_date:
+            query = query.where(FinancialMovement.date <= end_date)
+        
+        # Get movements
+        movements = session.exec(query).all()
+        
+        # Create property lookup for better display
+        property_lookup = {prop.id: prop.address for prop in user_properties}
+        
+        # Prepare data for Excel
+        excel_data = []
+        for movement in movements:
+            property_address = property_lookup.get(movement.property_id, "Sin propiedad asignada")
+            
+            excel_data.append({
+                "Fecha": movement.date.strftime("%d/%m/%Y"),
+                "Propiedad": property_address,
+                "Concepto": movement.concept,
+                "Categoría": movement.category,
+                "Subcategoría": movement.subcategory or "",
+                "Inquilino": movement.tenant_name or "",
+                "Importe": movement.amount,
+                "Clasificado": "Automático" if movement.is_classified else "Manual",
+                "Saldo Bancario": movement.bank_balance or ""
+            })
+        
+        if not excel_data:
+            raise HTTPException(status_code=404, detail="No movements found with the specified criteria")
+        
+        # Create DataFrame and Excel file
+        df = pd.DataFrame(excel_data)
+        
+        # Create Excel file in memory
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl', date_format='DD/MM/YYYY') as writer:
+            df.to_excel(writer, sheet_name='Movimientos', index=False)
+            
+            # Get the workbook and worksheet objects
+            workbook = writer.book
+            worksheet = workbook['Movimientos']
+            
+            # Auto-adjust column widths
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                
+                # Set column width with some padding
+                adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
+                worksheet.column_dimensions[column_letter].width = adjusted_width
+            
+            # Format the header row
+            for cell in worksheet[1]:
+                cell.font = workbook.fonts[0].copy(bold=True)
+                cell.fill = workbook.fills[0].copy()
+        
+        excel_buffer.seek(0)
+        
+        # Generate filename with current date and filters
+        filename_parts = ["movimientos"]
+        
+        if property_id:
+            prop_name = property_lookup.get(property_id, f"propiedad_{property_id}")
+            filename_parts.append(prop_name.replace(" ", "_").replace(",", "")[:20])
+        
+        if start_date and end_date:
+            filename_parts.append(f"{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}")
+        elif start_date:
+            filename_parts.append(f"desde_{start_date.strftime('%Y%m%d')}")
+        elif end_date:
+            filename_parts.append(f"hasta_{end_date.strftime('%Y%m%d')}")
+        
+        if category:
+            filename_parts.append(category.lower())
+        
+        current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename_parts.append(current_date)
+        
+        filename = "_".join(filename_parts) + ".xlsx"
+        
+        # Return as streaming response
+        return StreamingResponse(
+            io.BytesIO(excel_buffer.read()),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR in export_movements_to_excel: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error exporting movements to Excel: {str(e)}")
+
+@router.delete("/delete-by-date-range")
 def delete_movements_by_date_range(
     start_date: str,
     end_date: str,
@@ -261,7 +408,7 @@ def delete_movements_by_date_range(
         
         return {
             "message": f"Successfully deleted {count} movements between {start_date} and {end_date}",
-            "count": count,
+            "deleted_count": count,
             "start_date": start_date,
             "end_date": end_date,
             "property_id": property_id
@@ -273,51 +420,67 @@ def delete_movements_by_date_range(
         print(f"ERROR in delete_movements_by_date_range: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error deleting movements: {str(e)}")
 
-@router.delete("/delete-all-backup")
-def delete_all_movements(
+@router.post("/", response_model=FinancialMovementResponse)
+def create_financial_movement(
+    movement_data: FinancialMovementCreate,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
-    """Delete all financial movements for current user"""
-    print(f"DEBUG: delete_all_movements endpoint reached")
-    try:
-        print(f"DEBUG: delete_all_movements called for user {current_user.id}")
-        # Get all user properties first
-        user_properties = session.exec(
-            select(Property).where(Property.owner_id == current_user.id)
-        ).all()
-        print(f"DEBUG: Found {len(user_properties)} properties for user")
-        
-        property_ids = [prop.id for prop in user_properties]
-        
-        # Delete movements for user properties, or user's unassigned movements
-        if property_ids:
-            movements = session.exec(
-                select(FinancialMovement).where(
-                    (FinancialMovement.property_id.in_(property_ids)) | 
-                    ((FinancialMovement.property_id.is_(None)) & (FinancialMovement.user_id == current_user.id))
-                )
-            ).all()
-        else:
-            # If no properties, only delete user's unassigned movements
-            movements = session.exec(
-                select(FinancialMovement).where(
-                    (FinancialMovement.property_id.is_(None)) & 
-                    (FinancialMovement.user_id == current_user.id)
-                )
-            ).all()
-        
-        count = len(movements)
-        
-        for movement in movements:
-            session.delete(movement)
-        
-        session.commit()
-        
-        return {"message": f"Successfully deleted {count} movements", "count": count}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error deleting movements: {str(e)}")
+    """Create a new financial movement"""
+    # Verify property ownership
+    property_obj = session.get(Property, movement_data.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    movement = FinancialMovement(**movement_data.dict())
+    session.add(movement)
+    session.commit()
+    session.refresh(movement)
+    return movement
+
+@router.get("/{movement_id}", response_model=FinancialMovementResponse)
+def get_financial_movement(
+    movement_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get a specific financial movement"""
+    movement = session.get(FinancialMovement, movement_id)
+    if not movement:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Verify ownership through property
+    property_obj = session.get(Property, movement.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    return movement
+
+@router.put("/{movement_id}", response_model=FinancialMovementResponse)
+def update_financial_movement(
+    movement_id: int,
+    movement_data: FinancialMovementUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Update a financial movement"""
+    movement = session.get(FinancialMovement, movement_id)
+    if not movement:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Verify ownership
+    property_obj = session.get(Property, movement.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Update fields
+    for field, value in movement_data.dict(exclude_unset=True).items():
+        setattr(movement, field, value)
+    
+    session.commit()
+    session.refresh(movement)
+    return movement
+
 
 @router.delete("/{movement_id}")
 def delete_financial_movement(
@@ -437,33 +600,17 @@ def upload_excel_bank_statement(
         
         for index, row in df.iterrows():
             try:
-                # Parse date
-                if pd.isna(row['Fecha']):
-                    errors.append(f"Row {index + 1}: Missing date")
+                # Parse date using European format parser
+                parsed_date = parse_european_date(row['Fecha'])
+                if not parsed_date:
+                    errors.append(f"Row {index + 1}: Invalid or missing date: {row['Fecha']}")
                     continue
                 
-                if isinstance(row['Fecha'], str):
-                    # Try different date formats
-                    date_formats = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y']
-                    parsed_date = None
-                    for fmt in date_formats:
-                        try:
-                            parsed_date = datetime.strptime(row['Fecha'], fmt).date()
-                            break
-                        except ValueError:
-                            continue
-                    if not parsed_date:
-                        errors.append(f"Row {index + 1}: Invalid date format: {row['Fecha']}")
-                        continue
-                else:
-                    parsed_date = row['Fecha'].date() if hasattr(row['Fecha'], 'date') else row['Fecha']
-                
-                # Parse amount
-                if pd.isna(row['Importe']):
-                    errors.append(f"Row {index + 1}: Missing amount")
+                # Parse amount using European format parser
+                amount = parse_european_amount(row['Importe'])
+                if amount is None:
+                    errors.append(f"Row {index + 1}: Invalid or missing amount: {row['Importe']}")
                     continue
-                
-                amount = float(row['Importe'])
                 concept = str(row['Concepto']) if not pd.isna(row['Concepto']) else ""
                 
                 # Auto-classify based on rules
@@ -600,31 +747,14 @@ def upload_excel_global_movements(
         for index, row in df.iterrows():
             print(f"EXCEL PROCESSING: Processing row {index + 1}")
             try:
-                # Parse date
-                if pd.isna(row['Fecha']):
-                    errors.append(f"Row {index + 1}: Missing date")
+                # Parse date using European format parser
+                print(f"EXCEL DATE PARSING: Row {index + 1} - Processing date: {row['Fecha']}")
+                parsed_date = parse_european_date(row['Fecha'])
+                if not parsed_date:
+                    errors.append(f"Row {index + 1}: Invalid or missing date: {row['Fecha']}")
                     continue
                 
-                if isinstance(row['Fecha'], str):
-                    print(f"EXCEL DATE PARSING: Row {index + 1} - String date: '{row['Fecha']}'")
-                    # Try different date formats
-                    date_formats = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y']
-                    parsed_date = None
-                    for fmt in date_formats:
-                        try:
-                            parsed_date = datetime.strptime(row['Fecha'], fmt).date()
-                            print(f"EXCEL DATE PARSING: Successfully parsed '{row['Fecha']}' using format '{fmt}' -> {parsed_date}")
-                            break
-                        except ValueError:
-                            continue
-                    if not parsed_date:
-                        errors.append(f"Row {index + 1}: Invalid date format: {row['Fecha']}")
-                        continue
-                else:
-                    # This is likely an Excel date object
-                    print(f"EXCEL DATE PARSING: Row {index + 1} - Excel date object: {row['Fecha']} (type: {type(row['Fecha'])})")
-                    parsed_date = row['Fecha'].date() if hasattr(row['Fecha'], 'date') else row['Fecha']
-                    print(f"EXCEL DATE PARSING: Converted to: {parsed_date}")
+                print(f"EXCEL DATE PARSING: Successfully parsed to: {parsed_date}")
                 
                 # Additional validation - check if date is reasonable
                 from datetime import date
@@ -632,13 +762,24 @@ def upload_excel_global_movements(
                     print(f"EXCEL DATE WARNING: Row {index + 1} - Date {parsed_date} seems unusual")
                     errors.append(f"Row {index + 1}: Date {parsed_date} seems out of reasonable range")
                 
-                # Parse amount
-                if pd.isna(row['Importe']):
-                    errors.append(f"Row {index + 1}: Missing amount")
+                # Parse amount using European format parser
+                print(f"EXCEL AMOUNT PARSING: Row {index + 1} - Processing amount: {row['Importe']}")
+                amount = parse_european_amount(row['Importe'])
+                if amount is None:
+                    errors.append(f"Row {index + 1}: Invalid or missing amount: {row['Importe']}")
                     continue
                 
-                amount = float(row['Importe'])
+                print(f"EXCEL AMOUNT PARSING: Successfully parsed to: {amount}")
                 concept = str(row['Concepto']) if not pd.isna(row['Concepto']) else ""
+                
+                # Clean concept from Bankinter coletillas
+                import re
+                concept = re.sub(r'Pulsa para ver detalle.*$', '', concept, flags=re.IGNORECASE | re.MULTILINE)
+                concept = re.sub(r'\n.*Pulsa para ver.*$', '', concept, flags=re.IGNORECASE | re.MULTILINE)
+                concept = re.sub(r'.*Pulsa para ver.*', '', concept, flags=re.IGNORECASE)
+                concept = re.sub(r'\n+', ' ', concept)
+                concept = re.sub(r'\s+', ' ', concept)
+                concept = concept.strip()
                 
                 # Check for duplicates
                 signature = f"{parsed_date}|{concept}|{amount}"
@@ -654,20 +795,41 @@ def upload_excel_global_movements(
                 tenant_name = None
                 is_classified = False
                 
-                # Check all rules for matches
+                # Check all rules for matches with improved matching
                 print(f"CLASSIFICATION: Testing concept '{concept}' against {len(rules)} rules")
+                best_match = None
+                best_score = 0
+                
+                # Normalize concept for better matching
+                concept_normalized = concept.upper().strip()
+                
                 for rule in rules:
-                    print(f"CLASSIFICATION: Testing rule '{rule.keyword}' vs concept '{concept}'")
-                    if rule.keyword.lower() in concept.lower():
-                        matched_property_id = rule.property_id
-                        category = rule.category
-                        subcategory = rule.subcategory
-                        tenant_name = rule.tenant_name
-                        is_classified = True
-                        print(f"CLASSIFICATION: *** MATCH FOUND *** Applied rule '{rule.keyword}' -> Property {rule.property_id}")
-                        break  # Use first match
+                    rule_keyword = rule.keyword.upper().strip()
+                    print(f"CLASSIFICATION: Testing rule '{rule_keyword}' vs concept '{concept_normalized}'")
+                    
+                    # Calculate match score
+                    if rule_keyword in concept_normalized:
+                        # Score based on how much of the concept the keyword covers
+                        score = len(rule_keyword) / len(concept_normalized) if concept_normalized else 0
+                        print(f"CLASSIFICATION: Match found with score {score:.2f}")
+                        
+                        if score > best_score:
+                            best_score = score
+                            best_match = rule
+                            print(f"CLASSIFICATION: New best match: '{rule_keyword}' with score {score:.2f}")
                     else:
-                        print(f"CLASSIFICATION: No match for rule '{rule.keyword}'")
+                        print(f"CLASSIFICATION: No match for rule '{rule_keyword}'")
+                
+                # Apply best match if found
+                if best_match and best_score > 0.1:  # Minimum threshold
+                    matched_property_id = best_match.property_id
+                    category = best_match.category
+                    subcategory = best_match.subcategory
+                    tenant_name = best_match.tenant_name
+                    is_classified = True
+                    print(f"CLASSIFICATION: *** BEST MATCH APPLIED *** '{best_match.keyword}' -> Property {best_match.property_id} (score: {best_score:.2f})")
+                else:
+                    print(f"CLASSIFICATION: No suitable match found")
                 
                 # Create movement with classification applied
                 movement = FinancialMovement(

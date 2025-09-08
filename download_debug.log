@@ -1,0 +1,256 @@
+2025-08-22 22:37:44.861820: Iniciando descarga para test_user
+2025-08-22 22:37:44.862519: Conectando REAL...
+2025-08-22 22:37:44.863987: ERROR Error, usando simulado: ERROR No se pudo establecer conexión con Bankinter
+2025-08-22 22:44:56.911725: Iniciando descarga para test_user
+2025-08-22 22:44:56.912011: Conectando REAL...
+2025-08-22 22:45:05.018339: Cliente conectado exitosamente
+2025-08-22 22:45:30.177913: ERROR Error, usando simulado: 'BankinterClient' object has no attribute 'get_accounts_web'
+2025-08-22 22:46:02.713070: Iniciando descarga para test_user
+2025-08-22 22:46:02.713585: Conectando REAL...
+2025-08-22 22:46:10.121873: Cliente conectado exitosamente
+2025-08-22 22:46:35.758140: ERROR Error, usando simulado: 'BankinterClient' object has no attribute 'categorize_transactions'
+2025-08-22 22:47:05.810987: Iniciando descarga para test_user
+2025-08-22 22:47:05.811355: Conectando REAL...
+2025-08-22 22:47:12.851479: Cliente conectado exitosamente
+2025-08-22 22:47:38.504581: ERROR Error, usando simulado: 'BankinterClient' object has no attribute 'generate_realistic_sample_data'
+2025-08-22 22:48:12.682314: Iniciando descarga para test_user
+2025-08-22 22:48:12.682724: Conectando REAL...
+2025-08-22 22:48:18.844402: Cliente conectado exitosamente
+2025-08-22 22:48:44.403992: ERROR Error, usando simulado: 'BankinterClient' object has no attribute 'export_to_csv'
+2025-08-22 22:49:10.524892: Iniciando descarga para test_user
+2025-08-22 22:49:10.525488: Conectando REAL...
+2025-08-22 22:49:21.811236: Cliente conectado exitosamente
+2025-08-22 22:49:47.577317: ERROR Error, usando simulado: 'BankinterClient' object has no attribute 'cleanup'
+2025-08-22 23:06:11.377237: Iniciando descarga para test_user
+2025-08-22 23:06:11.377657: Conectando REAL...
+2025-08-22 23:06:30.898122: Cliente conectado exitosamente
+2025-08-22 23:07:37.415917: Iniciando descarga para test_user
+2025-08-22 23:07:37.416330: Conectando REAL...
+2025-08-22 23:07:55.229646: Cliente conectado exitosamente
+2025-08-22 23:14:20.149205: Iniciando descarga para test_user
+2025-08-22 23:14:20.149599: Conectando REAL...
+2025-08-22 23:14:20.149941: Cliente conectado exitosamente
+2025-08-22 23:14:23.160616: ERROR Error, usando simulado: 'NoneType' object has no attribute 'save_screenshot'
+2025-08-22 23:15:27.204982: Iniciando descarga para test_user
+2025-08-22 23:15:27.205423: Conectando REAL...
+2025-08-22 23:15:27.205750: Cliente conectado exitosamente
+2025-08-22 23:15:27.206066: WARNING No hay cuentas, usando simulado
+2025-08-22 23:21:43.950040: Iniciando descarga para test_user
+2025-08-22 23:21:43.950640: Conectando REAL...
+2025-08-22 23:21:43.951090: Cliente conectado exitosamente
+2025-08-22 23:21:43.952063: WARNING No hay cuentas, usando simulado
+2025-08-22 23:29:28.727708: Iniciando descarga para test_user
+2025-08-22 23:29:28.728217: Conectando REAL...
+2025-08-22 23:29:28.728773: Cliente conectado exitosamente
+2025-08-22 23:29:28.729462: WARNING No hay cuentas, usando simulado
+2025-08-22 23:31:17.954284: Iniciando descarga para 75867185
+2025-08-22 23:31:17.954773: Conectando REAL...
+2025-08-22 23:31:17.955118: Cliente conectado exitosamente
+2025-08-22 23:31:17.955439: WARNING No hay cuentas, usando simulado
+2025-08-22 23:39:39.487942: Iniciando descarga para 75867185
+2025-08-22 23:39:39.488635: Conectando REAL...
+2025-08-22 23:39:39.489209: Cliente conectado exitosamente
+2025-08-22 23:39:39.489846: WARNING No hay cuentas, usando simulado
+2025-08-22 23:39:46.990618: Iniciando descarga para 75867185
+2025-08-22 23:39:46.991176: Conectando REAL...
+2025-08-22 23:39:46.991508: Cliente conectado exitosamente
+2025-08-22 23:39:46.991830: WARNING No hay cuentas, usando simulado
+2025-08-23 00:22:27.011869: Iniciando descarga para 75867185
+2025-08-23 00:22:27.013402: Conectando REAL...
+2025-08-23 00:22:49.391949: Cliente conectado exitosamente
+2025-08-23 00:28:37.991073: Iniciando descarga para 75867185
+2025-08-23 00:28:37.991538: Conectando REAL...
+2025-08-23 00:29:01.586515: Cliente conectado exitosamente
+2025-08-23 00:32:56.445491: Iniciando descarga para 75867185
+2025-08-23 00:32:56.445838: Conectando REAL...
+2025-08-23 00:33:17.468751: Cliente conectado exitosamente
+2025-08-23 00:38:43.272583: Iniciando descarga para 75867185
+2025-08-23 00:38:43.272873: Conectando REAL...
+2025-08-23 00:39:05.253102: Cliente conectado exitosamente
+2025-08-23 00:43:34.302607: Iniciando descarga para 75867185
+2025-08-23 00:43:34.302960: Conectando REAL...
+2025-08-23 00:43:57.693274: Cliente conectado exitosamente
+2025-08-23 00:48:24.517329: Iniciando descarga para 75867185
+2025-08-23 00:48:24.517725: Conectando REAL...
+2025-08-23 00:48:44.955253: Cliente conectado exitosamente
+2025-08-23 00:53:41.213893: Iniciando descarga para 75867185
+2025-08-23 00:53:41.214189: Conectando REAL...
+2025-08-23 00:54:03.436466: Cliente conectado exitosamente
+2025-08-23 01:08:16.415394: Iniciando descarga para 75867185
+2025-08-23 01:08:16.415698: Conectando REAL...
+2025-08-23 01:08:45.922343: Cliente conectado exitosamente
+2025-08-23 01:19:25.645729: Iniciando descarga para 75867185
+2025-08-23 01:19:25.646050: Conectando REAL...
+2025-08-23 01:19:47.702051: Cliente conectado exitosamente
+2025-08-23 01:37:18.271421: Iniciando descarga para 75867185
+2025-08-23 01:37:18.271726: Conectando REAL...
+2025-08-23 01:37:54.689446: Cliente conectado exitosamente
+2025-08-23 01:40:29.081347: Iniciando descarga para 75867185
+2025-08-23 01:40:29.081644: Conectando REAL...
+2025-08-23 01:40:50.961155: Cliente conectado exitosamente
+2025-08-23 01:45:52.734000: Iniciando descarga para 75867185
+2025-08-23 01:45:52.734354: Conectando REAL...
+2025-08-23 01:46:48.525077: Cliente conectado exitosamente
+2025-08-23 01:51:42.166937: Iniciando descarga para 75867185
+2025-08-23 01:51:42.167323: Conectando REAL...
+2025-08-23 01:52:05.762971: Cliente conectado exitosamente
+2025-08-23 01:54:27.709708: Iniciando descarga para 75867185
+2025-08-23 01:54:27.710031: Conectando REAL...
+2025-08-23 01:56:05.630469: Iniciando descarga para 75867185
+2025-08-23 01:56:05.630788: Conectando REAL...
+2025-08-23 01:56:28.681262: Cliente conectado exitosamente
+2025-08-23 01:57:05.531721: ERROR CRÍTICO Error real: cannot access local variable 'date' where it is not associated with a value
+2025-08-23 02:03:18.475823: Iniciando descarga para 75867185
+2025-08-23 02:03:18.476148: Conectando REAL...
+2025-08-23 02:03:41.126619: Cliente conectado exitosamente
+2025-08-23 02:04:17.967691: ERROR CRÍTICO Error real: cannot access local variable 'date' where it is not associated with a value
+2025-08-23 09:53:25.942027: Iniciando descarga para 75867185
+2025-08-23 09:53:25.943125: Conectando REAL...
+2025-08-23 09:53:46.454000: Cliente conectado exitosamente
+2025-08-23 09:54:23.301437: ERROR CRÍTICO Error real: cannot access local variable 'date' where it is not associated with a value
+2025-08-23 09:59:06.939235: Iniciando descarga para 75867185
+2025-08-23 09:59:06.939538: Conectando REAL...
+2025-08-23 09:59:26.974107: Cliente conectado exitosamente
+2025-08-23 10:00:03.831801: ERROR CRÍTICO Error real: cannot access local variable 'date' where it is not associated with a value
+2025-08-23 10:05:01.939411: Iniciando descarga para 75867185
+2025-08-23 10:05:01.939743: Conectando REAL...
+2025-08-23 10:05:20.118299: Cliente conectado exitosamente
+2025-08-23 10:08:39.967824: Iniciando descarga para 75867185
+2025-08-23 10:08:39.968119: Conectando REAL...
+2025-08-23 10:09:00.265719: Cliente conectado exitosamente
+2025-08-23 10:15:02.392317: Iniciando descarga para 75867185
+2025-08-23 10:15:02.392991: Conectando REAL...
+2025-08-23 10:15:22.684225: Cliente conectado exitosamente
+2025-08-23 10:16:01.626994: ERROR CRÍTICO Error real: NO SE PUEDEN EXTRAER DATOS REALES DE BANKINTER - REVISA LA CONEXIÓN
+2025-08-23 10:16:46.050431: Iniciando descarga para 75867185
+2025-08-23 10:16:46.050738: Conectando REAL...
+2025-08-23 10:17:05.003947: Cliente conectado exitosamente
+2025-08-23 10:17:31.642884: ERROR CRÍTICO Error real: Message: tab crashed
+  (Session info: chrome=139.0.7258.128)
+Stacktrace:
+	GetHandleVerifier [0x0x82ffc3+65331]
+	GetHandleVerifier [0x0x830004+65396]
+	(No symbol) [0x0x623dc0]
+	(No symbol) [0x0x614920]
+	(No symbol) [0x0x612904]
+	(No symbol) [0x0x6133cd]
+	(No symbol) [0x0x61fbf9]
+	(No symbol) [0x0x6310b5]
+	(No symbol) [0x0x636aa6]
+	(No symbol) [0x0x613a0d]
+	(No symbol) [0x0x630950]
+	(No symbol) [0x0x6b2ada]
+	(No symbol) [0x0x6912d6]
+	(No symbol) [0x0x660910]
+	(No symbol) [0x0x661784]
+	GetHandleVerifier [0x0xa738b3+2439203]
+	GetHandleVerifier [0x0xa6eae2+2419282]
+	GetHandleVerifier [0x0x85712a+225434]
+	GetHandleVerifier [0x0x846e08+159096]
+	GetHandleVerifier [0x0x84dd5d+187597]
+	GetHandleVerifier [0x0x837ad8+96840]
+	GetHandleVerifier [0x0x837c62+97234]
+	GetHandleVerifier [0x0x82277a+9962]
+	BaseThreadInitThunk [0x0x77577ba9+25]
+	RtlInitializeExceptionChain [0x0x77b9c10b+107]
+	RtlClearBits [0x0x77b9c08f+191]
+
+2025-08-23 10:18:25.874334: Iniciando descarga para 75867185
+2025-08-23 10:18:25.874632: Conectando REAL...
+2025-08-23 10:18:46.691754: Cliente conectado exitosamente
+2025-08-23 10:18:58.870344: ERROR CRÍTICO Error real: Message: tab crashed
+  (Session info: chrome=139.0.7258.128)
+Stacktrace:
+	GetHandleVerifier [0x0x82ffc3+65331]
+	GetHandleVerifier [0x0x830004+65396]
+	(No symbol) [0x0x623dc0]
+	(No symbol) [0x0x614920]
+	(No symbol) [0x0x612904]
+	(No symbol) [0x0x6133cd]
+	(No symbol) [0x0x61fbf9]
+	(No symbol) [0x0x6310b5]
+	(No symbol) [0x0x636aa6]
+	(No symbol) [0x0x613a0d]
+	(No symbol) [0x0x630950]
+	(No symbol) [0x0x6b2ada]
+	(No symbol) [0x0x6912d6]
+	(No symbol) [0x0x660910]
+	(No symbol) [0x0x661784]
+	GetHandleVerifier [0x0xa738b3+2439203]
+	GetHandleVerifier [0x0xa6eae2+2419282]
+	GetHandleVerifier [0x0x85712a+225434]
+	GetHandleVerifier [0x0x846e08+159096]
+	GetHandleVerifier [0x0x84dd5d+187597]
+	GetHandleVerifier [0x0x837ad8+96840]
+	GetHandleVerifier [0x0x837c62+97234]
+	GetHandleVerifier [0x0x82277a+9962]
+	BaseThreadInitThunk [0x0x77577ba9+25]
+	RtlInitializeExceptionChain [0x0x77b9c10b+107]
+	RtlClearBits [0x0x77b9c08f+191]
+
+2025-08-23 10:20:04.413116: Iniciando descarga para 75867185
+2025-08-23 10:20:04.413422: Conectando REAL...
+2025-08-23 10:20:23.497717: Cliente conectado exitosamente
+2025-08-23 10:20:32.633307: ERROR CRÍTICO Error real: Message: tab crashed
+  (Session info: chrome=139.0.7258.128)
+Stacktrace:
+	GetHandleVerifier [0x0x82ffc3+65331]
+	GetHandleVerifier [0x0x830004+65396]
+	(No symbol) [0x0x623dc0]
+	(No symbol) [0x0x614920]
+	(No symbol) [0x0x612904]
+	(No symbol) [0x0x6133cd]
+	(No symbol) [0x0x61fbf9]
+	(No symbol) [0x0x6310b5]
+	(No symbol) [0x0x636aa6]
+	(No symbol) [0x0x613a0d]
+	(No symbol) [0x0x630950]
+	(No symbol) [0x0x6b2ada]
+	(No symbol) [0x0x6912d6]
+	(No symbol) [0x0x660910]
+	(No symbol) [0x0x661784]
+	GetHandleVerifier [0x0xa738b3+2439203]
+	GetHandleVerifier [0x0xa6eae2+2419282]
+	GetHandleVerifier [0x0x85712a+225434]
+	GetHandleVerifier [0x0x846e08+159096]
+	GetHandleVerifier [0x0x84dd5d+187597]
+	GetHandleVerifier [0x0x837ad8+96840]
+	GetHandleVerifier [0x0x837c62+97234]
+	GetHandleVerifier [0x0x82277a+9962]
+	BaseThreadInitThunk [0x0x77577ba9+25]
+	RtlInitializeExceptionChain [0x0x77b9c10b+107]
+	RtlClearBits [0x0x77b9c08f+191]
+
+2025-08-23 10:24:30.109775: Iniciando descarga para 75867185
+2025-08-23 10:24:30.110091: Conectando REAL...
+2025-08-23 10:24:49.668562: Cliente conectado exitosamente
+2025-08-23 10:25:03.403552: ERROR CRÍTICO Error real: Message: tab crashed
+  (Session info: chrome=139.0.7258.128)
+Stacktrace:
+	GetHandleVerifier [0x0x82ffc3+65331]
+	GetHandleVerifier [0x0x830004+65396]
+	(No symbol) [0x0x623dc0]
+	(No symbol) [0x0x614920]
+	(No symbol) [0x0x612904]
+	(No symbol) [0x0x6133cd]
+	(No symbol) [0x0x61fbf9]
+	(No symbol) [0x0x6310b5]
+	(No symbol) [0x0x636aa6]
+	(No symbol) [0x0x613a0d]
+	(No symbol) [0x0x630950]
+	(No symbol) [0x0x6b2ada]
+	(No symbol) [0x0x6912d6]
+	(No symbol) [0x0x660910]
+	(No symbol) [0x0x661784]
+	GetHandleVerifier [0x0xa738b3+2439203]
+	GetHandleVerifier [0x0xa6eae2+2419282]
+	GetHandleVerifier [0x0x85712a+225434]
+	GetHandleVerifier [0x0x846e08+159096]
+	GetHandleVerifier [0x0x84dd5d+187597]
+	GetHandleVerifier [0x0x837ad8+96840]
+	GetHandleVerifier [0x0x837c62+97234]
+	GetHandleVerifier [0x0x82277a+9962]
+	BaseThreadInitThunk [0x0x77577ba9+25]
+	RtlInitializeExceptionChain [0x0x77b9c10b+107]
+	RtlClearBits [0x0x77b9c08f+191]
+

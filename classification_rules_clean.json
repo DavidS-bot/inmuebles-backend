@@ -1,0 +1,447 @@
+{
+  "extraction_info": {
+    "source": "https://inmuebles-david.vercel.app/financial-agent/rules",
+    "extracted_at": "2025-09-04",
+    "total_rules": 48,
+    "total_properties": 11,
+    "categories": {
+      "Renta": 32,
+      "Hipoteca": 16,
+      "Gasto": 0
+    }
+  },
+  "rules": [
+    {
+      "id": 1,
+      "property_id": 1,
+      "keyword": "LIQUID. CUOTA PTMO.  510033155",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "property_id": 1,
+      "keyword": "ROCIO SOTO ZUNIGA",
+      "category": "Renta",
+      "subcategory": "Alquiler",
+      "tenant_name": "Rocio Soto Zuñiga",
+      "is_active": true
+    },
+    {
+      "id": 3,
+      "property_id": 2,
+      "keyword": "TRANSF /RODRIGUEZ MORENO JORGE",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Jorge Rodriguez Moreno / Susana Peculo Camacho",
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "property_id": 4,
+      "keyword": "TRANS INM/ ALVARO MANU BOHORQU",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Álvaro Manuel Bohórquez Heredia",
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "property_id": 4,
+      "keyword": "TRANSF O /MARIA HIDALGO LLORCA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Maria Hidalgo Llorca / Jose Antonio Becerra Toro",
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "property_id": 4,
+      "keyword": "AMORT. FINAN. M.E. 5552280",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 7,
+      "property_id": 3,
+      "keyword": "TRANSF  /ANTONIO RASHAD HANSON",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Antonio Rashad Hanson / Olga Ventrone",
+      "is_active": true
+    },
+    {
+      "id": 8,
+      "property_id": 3,
+      "keyword": "LIQUID. CUOTA PTMO.  510043004",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 9,
+      "property_id": 5,
+      "keyword": "TRANSF. LEANDRO EMANUEL AFONSO MA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Leandro Emanuel Afonso Martins",
+      "is_active": true
+    },
+    {
+      "id": 10,
+      "property_id": 5,
+      "keyword": "ABONO LEANDRO EMANUEL AFONSO MA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Leandro Emanuel Afonso Martins",
+      "is_active": true
+    },
+    {
+      "id": 11,
+      "property_id": 5,
+      "keyword": "CUOTA PTMO 856025939-0              ",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 12,
+      "property_id": 5,
+      "keyword": "TRANSF. SERGIO BRAVO BANASCO     ",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Sergio Bravo Bañasco",
+      "is_active": true
+    },
+    {
+      "id": 13,
+      "property_id": 5,
+      "keyword": "ABONO SERGIO BRAVO BANASCO     ",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Sergio Bravo Bañasco",
+      "is_active": true
+    },
+    {
+      "id": 14,
+      "property_id": 6,
+      "keyword": "TRANS INM/ GARCIA BAENA JESUS",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Judit Torres Castillo y Jesus García Baena",
+      "is_active": true
+    },
+    {
+      "id": 15,
+      "property_id": 7,
+      "keyword": "TRANS /ANTONIO JOSE LOPEZ-ACUN",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Antonio Jose Lopez Acuña Herrero",
+      "is_active": true
+    },
+    {
+      "id": 16,
+      "property_id": 7,
+      "keyword": "TRANS INM/ ANTONIO JOSE LOPEZ-",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Antonio Jose Lopez Acuña Herrero",
+      "is_active": true
+    },
+    {
+      "id": 17,
+      "property_id": 6,
+      "keyword": "TRANS INM/ TORRES CASTILLO JUD",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Judit Torres Castillo y Jesus García Baena",
+      "is_active": true
+    },
+    {
+      "id": 18,
+      "property_id": 6,
+      "keyword": "TRANSF OTR /GARCIA BAENA JESUS",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Judit Torres Castillo y Jesus García Baena",
+      "is_active": true
+    },
+    {
+      "id": 19,
+      "property_id": 8,
+      "keyword": "TRANS /CLIFF GROSSMAN LLEBARIA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Cliff Grossman Llebaria",
+      "is_active": true
+    },
+    {
+      "id": 20,
+      "property_id": 9,
+      "keyword": "TRANSF  /MANUELA GIRALDO MEJIA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Manuela Giraldo Mejia",
+      "is_active": true
+    },
+    {
+      "id": 21,
+      "property_id": 9,
+      "keyword": "TRANSF  /TORRES CASTILLO JUDIT",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Judit Torres Castillo",
+      "is_active": true
+    },
+    {
+      "id": 22,
+      "property_id": 9,
+      "keyword": "TRANS /HERNANDEZ PLAZA ROBERTO",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Roberto Hernández Plaza y Kerthyns Yaney del Carmen Cavadia González",
+      "is_active": true
+    },
+    {
+      "id": 23,
+      "property_id": 10,
+      "keyword": "TRANS INM/ JESUS JAVIER RODRIG",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Jesus Javier Rodriguez y Josefa Roman Millan",
+      "is_active": true
+    },
+    {
+      "id": 24,
+      "property_id": 10,
+      "keyword": "TRANSF OTRAS /LUCIA MARIN CHIA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Lucia Marin Chia y Fernando Marin Carrascal",
+      "is_active": true
+    },
+    {
+      "id": 25,
+      "property_id": 11,
+      "keyword": "TRANS /MANUEL ORELLANA BADILLO",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Manuel Orellana Badillo",
+      "is_active": true
+    },
+    {
+      "id": 26,
+      "property_id": 2,
+      "keyword": "LIQUID. CUOTA PTMO.  510036284",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 27,
+      "property_id": 6,
+      "keyword": "0049 5770 103 0036060",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 28,
+      "property_id": 6,
+      "keyword": "0049 5770 103 0036064",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 29,
+      "property_id": 7,
+      "keyword": "0049 5770 103 0035879",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 30,
+      "property_id": 10,
+      "keyword": "0049 5770 103 0035880",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 31,
+      "property_id": 9,
+      "keyword": "0049 5770 103 0035881",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 32,
+      "property_id": 8,
+      "keyword": "0049 5770 103 0052488",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 34,
+      "property_id": 11,
+      "keyword": "0049 5770 103 0045584",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 35,
+      "property_id": 11,
+      "keyword": "0049 5770 103 0045585",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 37,
+      "property_id": 6,
+      "keyword": "TRANS INM GARCIA BAENA JESUS",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Judit Torres Castillo y Jesus García Baena",
+      "is_active": true
+    },
+    {
+      "id": 38,
+      "property_id": 3,
+      "keyword": "LIQUID. CUOTA PTMO. 510043004",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 39,
+      "property_id": 3,
+      "keyword": "TRANSF ANTONIO RASHAD HANSON",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Antonio Rashad Hanson / Olga Ventrone",
+      "is_active": true
+    },
+    {
+      "id": 40,
+      "property_id": 7,
+      "keyword": "TRANS INM ANTONIO JOSE LOPEZ-",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Antonio Jose Lopez Acuña Herrero",
+      "is_active": true
+    },
+    {
+      "id": 41,
+      "property_id": 1,
+      "keyword": "LIQUID. CUOTA PTMO. 510033155",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 42,
+      "property_id": 1,
+      "keyword": "TRANS MARIA ROCIO SOTO ZUNIGA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Rocio Soto Zuñiga",
+      "is_active": true
+    },
+    {
+      "id": 43,
+      "property_id": 4,
+      "keyword": "TRANS INM ALVARO MANU BOHORQU",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Álvaro Manuel Bohórquez Heredia",
+      "is_active": true
+    },
+    {
+      "id": 44,
+      "property_id": 8,
+      "keyword": "TRANS CLIFF GROSSMAN LLEBARIA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Cliff Grossman Llebaria",
+      "is_active": true
+    },
+    {
+      "id": 45,
+      "property_id": 2,
+      "keyword": "TRANSF RODRIGUEZ MORENO JORGE",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Jorge Rodriguez Moreno / Susana Peculo Camacho",
+      "is_active": true
+    },
+    {
+      "id": 46,
+      "property_id": 9,
+      "keyword": "TRANS INM DANIEL VAZQUEZ JURA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Daniel Vázquez Jurado y Sara Georgiana Sociu",
+      "is_active": true
+    },
+    {
+      "id": 47,
+      "property_id": 2,
+      "keyword": "LIQUID. CUOTA PTMO. 510036284",
+      "category": "Hipoteca",
+      "subcategory": null,
+      "tenant_name": null,
+      "is_active": true
+    },
+    {
+      "id": 48,
+      "property_id": 11,
+      "keyword": "TRANS INM MONTAAO SANCHEZ EV",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Manuel Avalos Fuentes y Eva María Montaño Sánchez",
+      "is_active": true
+    },
+    {
+      "id": 49,
+      "property_id": 2,
+      "keyword": "TRANS INM/ RODRIGUEZ MORENO JO",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Jorge Rodriguez Moreno / Susana Peculo Camacho",
+      "is_active": true
+    },
+    {
+      "id": 50,
+      "property_id": 10,
+      "keyword": "TRANSF OTRAS LUCIA MARIN CHIA",
+      "category": "Renta",
+      "subcategory": null,
+      "tenant_name": "Lucia Marin Chia y Fernando Marin Carrascal",
+      "is_active": true
+    }
+  ]
+}

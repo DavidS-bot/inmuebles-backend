@@ -1,0 +1,8 @@
+PLACEHOLDER: Centro de Integraciones
+Descripción: Gestión de conexiones con servicios externos
+Archivo esperado: 07_integraciones.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

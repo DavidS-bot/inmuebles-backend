@@ -1,0 +1,43 @@
+Asunto: TPP support tool registration
+
+Estimados,
+
+Solicito acceso al sandbox de PSD2 para desarrollo de aplicación de gestión inmobiliaria.
+
+DATOS DE LA EMPRESA:
+- Nombre: Gestión Inmobiliaria David
+- Email: david@inmuebles.es
+- Teléfono: +34 XXX XXX XXX
+- Dirección: España
+
+DATOS TÉCNICOS:
+- Tipo de servicio: Account Information Service Provider (AISP)
+- Finalidad: Gestión automática de transacciones bancarias para gestión inmobiliaria
+- Banco objetivo: Bankinter
+- Entorno: Sandbox inicialmente, producción posteriormente
+
+DATOS DEL DESARROLLADOR:
+- Nombre: David
+- Experiencia: Desarrollo de APIs bancarias y aplicaciones de gestión
+- Framework: Python + FastAPI
+- Casos de uso: Descarga automática de movimientos bancarios, conciliación de pagos de alquiler
+
+JUSTIFICACIÓN DEL PROYECTO:
+Desarrollo de una aplicación de gestión inmobiliaria que requiere acceso automático 
+a transacciones bancarias para:
+- Conciliación automática de pagos de alquiler
+- Gestión de gastos e ingresos de propiedades
+- Generación de informes financieros
+- Automatización de reportes contables
+
+La aplicación está siendo desarrollada para gestionar múltiples propiedades inmobiliarias
+y necesita acceso a transacciones de Bankinter para automatizar la conciliación de
+pagos de inquilinos y gastos asociados a las propiedades.
+
+Cumplo con todos los requisitos técnicos y de seguridad establecidos por PSD2.
+
+Quedo a la espera de su respuesta para proceder con la configuración.
+
+Saludos cordiales,
+David
+david@inmuebles.es

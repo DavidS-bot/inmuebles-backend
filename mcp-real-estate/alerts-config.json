@@ -1,0 +1,127 @@
+[
+  {
+    "id": "alert_1755983262245",
+    "name": "Pisos baratos Jerez",
+    "criteria": {
+      "location": "jerez",
+      "maxPrice": 80000,
+      "minPrice": null,
+      "rooms": 2,
+      "minSize": null,
+      "maxDaysOld": 14,
+      "keywords": []
+    },
+    "notifications": {
+      "email": "usuario@ejemplo.com",
+      "webhook": null,
+      "console": true
+    },
+    "schedule": {
+      "frequency": "hourly",
+      "lastCheck": "2025-08-23T21:09:20.400Z",
+      "nextCheck": "2025-08-23T22:09:20.400Z"
+    },
+    "active": true,
+    "created": "2025-08-23T21:07:42.245Z"
+  },
+  {
+    "id": "alert_1755983360283",
+    "name": "Pisos económicos Jerez",
+    "criteria": {
+      "location": "jerez",
+      "maxPrice": 85000,
+      "minPrice": null,
+      "rooms": 2,
+      "minSize": null,
+      "maxDaysOld": 7,
+      "keywords": []
+    },
+    "notifications": {
+      "email": "inversor@ejemplo.com",
+      "webhook": null,
+      "console": true
+    },
+    "schedule": {
+      "frequency": "daily",
+      "lastCheck": "2025-08-23T21:09:20.403Z",
+      "nextCheck": "2025-08-24T21:09:20.403Z"
+    },
+    "active": true,
+    "created": "2025-08-23T21:09:20.283Z"
+  },
+  {
+    "id": "alert_1755983360303",
+    "name": "Oportunidades de inversión",
+    "criteria": {
+      "location": "jerez",
+      "maxPrice": 120000,
+      "minPrice": 50000,
+      "rooms": 2,
+      "minSize": null,
+      "maxDaysOld": 7,
+      "keywords": []
+    },
+    "notifications": {
+      "email": "oportunidades@ejemplo.com",
+      "webhook": "https://hooks.ejemplo.com/webhook",
+      "console": true
+    },
+    "schedule": {
+      "frequency": "hourly",
+      "lastCheck": "2025-08-23T21:09:20.406Z",
+      "nextCheck": "2025-08-23T22:09:20.406Z"
+    },
+    "active": true,
+    "created": "2025-08-23T21:09:20.303Z"
+  },
+  {
+    "id": "alert_1755983360305",
+    "name": "Propiedades premium",
+    "criteria": {
+      "location": "jerez",
+      "maxPrice": null,
+      "minPrice": 100000,
+      "rooms": 2,
+      "minSize": null,
+      "maxDaysOld": 3,
+      "keywords": []
+    },
+    "notifications": {
+      "email": "premium@ejemplo.com",
+      "webhook": null,
+      "console": true
+    },
+    "schedule": {
+      "frequency": "hourly",
+      "lastCheck": "2025-08-23T21:09:20.409Z",
+      "nextCheck": "2025-08-23T22:09:20.409Z"
+    },
+    "active": true,
+    "created": "2025-08-23T21:09:20.305Z"
+  },
+  {
+    "id": "alert_1755983819552",
+    "name": "Oportunidades David - Jerez",
+    "criteria": {
+      "location": "jerez",
+      "maxPrice": 100000,
+      "minPrice": null,
+      "rooms": 2,
+      "minSize": null,
+      "maxDaysOld": 14,
+      "keywords": []
+    },
+    "notifications": {
+      "email": "davsanchez21277@gmail.com",
+      "webhook": null,
+      "console": true
+    },
+    "schedule": {
+      "frequency": "daily",
+      "lastCheck": null,
+      "nextCheck": null
+    },
+    "active": true,
+    "created": "2025-08-23T21:16:59.552Z"
+  }
+]

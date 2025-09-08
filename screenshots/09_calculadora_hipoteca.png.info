@@ -1,0 +1,8 @@
+PLACEHOLDER: Calculadora Hipotecaria
+Descripción: Herramienta de simulación y cálculo de cuotas
+Archivo esperado: 09_calculadora_hipoteca.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

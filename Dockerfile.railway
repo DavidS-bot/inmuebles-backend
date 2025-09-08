@@ -1,0 +1,44 @@
+# Multi-stage build para Railway
+FROM node:18-alpine AS frontend-builder
+
+# Construir frontend
+WORKDIR /app/frontend
+COPY inmuebles-web/package*.json ./
+RUN npm ci --only=production
+
+COPY inmuebles-web/ ./
+RUN npm run build
+
+# Backend Python
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependencias Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código del backend
+COPY app/ ./app/
+COPY *.py ./
+
+# Copiar frontend construido
+COPY --from=frontend-builder /app/frontend/out ./static/
+COPY --from=frontend-builder /app/frontend/.next/static ./static/_next/static
+
+# Crear usuario no-root
+RUN adduser --disabled-password --gecos '' appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Exponer puerto
+EXPOSE $PORT
+
+# Comando de inicio
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT

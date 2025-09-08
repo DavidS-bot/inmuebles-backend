@@ -1,0 +1,8 @@
+PLACEHOLDER: Informes Financieros de Propiedad
+Descripción: Reportes detallados con cash flow y análisis mensual
+Archivo esperado: 16_informes_propiedad.png
+
+Para generar este screenshot automáticamente:
+1. Asegurar que la aplicación esté corriendo en localhost:3000
+2. Instalar ChromeDriver
+3. Ejecutar: python capture_screenshots.py

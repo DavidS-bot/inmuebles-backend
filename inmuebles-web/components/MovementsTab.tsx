@@ -242,61 +242,50 @@ export default function MovementsTab() {
   const handleBankinterUpdate = async () => {
     setUpdatingBankinter(true);
     try {
-      alert('🏦 Iniciando sincronización con Bankinter\n\n⏳ Conectando a tu cuenta bancaria... Este proceso puede tardar 2-5 minutos.');
+      console.log('🏦 BANKINTER: Starting update process...');
+      alert('💡 Para sincronizar Bankinter:\n\n1. Descarga el Excel más reciente de tu banca online\n2. Usa el botón "📁 Subir Extracto" arriba\n3. Selecciona el archivo descargado\n\n⏳ Procesando datos existentes...');
       
-      // Usar el endpoint que sabemos que funciona
+      console.log('🏦 BANKINTER: Making API call to /integrations/bankinter/sync-now');
+      
+      // Usar endpoint que siempre funciona para dar feedback
       const response = await api.post('/integrations/bankinter/sync-now', {}, {
-        timeout: 180000 // 3 minutos timeout
+        timeout: 30000
       });
+      
+      console.log('🏦 BANKINTER: API call completed, status:', response.status);
       
       const result = response.data;
       
       if (result.sync_status === 'started') {
-        let message = `✅ ¡Sincronización Bankinter iniciada!\n\n`;
-        message += `⏳ Estado: ${result.message || 'Procesando...'}\n`;
-        message += `⌛ Duración estimada: ${result.estimated_duration || '2-5 minutos'}\n`;
-        
-        if (result.notification) {
-          message += `\n📬 ${result.notification}`;
-        }
-        
-        message += `\n\n💡 La página se actualizará automáticamente cuando termine la sincronización.`;
+        let message = `📋 Para obtener los movimientos más recientes:\n\n`;
+        message += `1️⃣ Ve a tu banca online de Bankinter\n`;
+        message += `2️⃣ Descarga el extracto Excel más reciente\n`;
+        message += `3️⃣ Usa el botón "📁 Subir Extracto" en esta página\n`;
+        message += `4️⃣ Selecciona el archivo descargado\n\n`;
+        message += `💡 Esto asegura que tengas todos los movimientos más actuales.\n\n`;
+        message += `📊 Los datos mostrados actualmente pueden no incluir las últimas transacciones.`;
         
         alert(message);
-        
-        // Recargar datos después de un tiempo para ver los nuevos movimientos
-        setTimeout(async () => {
-          await loadData();
-          alert('🔄 Datos actualizados. Revisa si hay nuevos movimientos.');
-        }, 60000); // Esperar 1 minuto antes de recargar
-        
+        await loadData(); // Reload current data
       } else {
-        // Manejar respuesta directa con movimientos
+        // Fallback for other response types
         const createdMovements = result.new_movements || result.created_movements || 0;
-        const duplicatesSkipped = result.duplicates_skipped || result.skipped_movements || 0;
-        const totalProcessed = result.total_movements || result.total_processed || 0;
-        
-        let message = `✅ ¡Sincronización Bankinter completada!\n\n`;
-        message += `📈 Movimientos nuevos: ${createdMovements}\n`;
-        message += `🔄 Duplicados omitidos: ${duplicatesSkipped}\n`;
-        message += `📊 Total procesados: ${totalProcessed}\n`;
-        
-        if (result.date_range) {
-          message += `📅 Período: ${result.date_range}\n`;
-        }
-        
-        if (createdMovements > 0) {
-          message += `\n🎉 ¡Nuevos movimientos sincronizados exitosamente!`;
-        } else {
-          message += `\nℹ️ Tu cuenta está actualizada. Todos los movimientos ya existían.`;
-        }
+        let message = `✅ Proceso completado\n\n`;
+        message += `📈 Datos actuales mostrados\n`;
+        message += `💡 Para datos más recientes, descarga y sube el extracto Excel de Bankinter`;
         
         alert(message);
         await loadData();
       }
       
     } catch (error: any) {
-      console.error('❌ Error conectando con Bankinter:', error);
+      console.error('❌ BANKINTER ERROR:', error);
+      console.error('❌ BANKINTER ERROR Details:', {
+        message: error?.message,
+        status: error?.response?.status,
+        data: error?.response?.data,
+        url: error?.config?.url
+      });
       
       let errorMessage = '❌ Error en conexión con Bankinter\n\n';
       

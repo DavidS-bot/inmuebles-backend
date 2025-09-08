@@ -243,13 +243,43 @@ export default function MovementsTab() {
     setUpdatingBankinter(true);
     try {
       console.log('🏦 BANKINTER: Starting update process...');
-      alert('🏦 Iniciando sincronización automática con Bankinter\n\n⏳ Conectando a tu cuenta bancaria... Este proceso puede tardar 2-5 minutos.\n\n📊 Descargando movimientos más recientes automáticamente.');
+      const shouldRunRealScraper = confirm(
+        '🏦 SINCRONIZACIÓN BANKINTER\n\n' +
+        '¿Quieres ejecutar el scraper REAL que abre el navegador?\n\n' +
+        '✅ SÍ = Ejecutar scraper real (abre Chrome, descarga datos actuales)\n' +
+        '❌ NO = Solo mostrar datos ya existentes\n\n' +
+        'El scraper real tarda 2-3 minutos pero obtiene los datos más recientes.'
+      );
+
+      if (shouldRunRealScraper) {
+        alert('🏦 EJECUTANDO SCRAPER REAL\n\n' +
+              '1️⃣ Se abrirá una ventana del navegador\n' +
+              '2️⃣ Se conectará automáticamente a Bankinter\n' +
+              '3️⃣ Descargará tus movimientos más recientes\n' +
+              '4️⃣ Los subirá automáticamente\n\n' +
+              '⏰ Espera 2-3 minutos sin cerrar nada');
+        
+        // Ejecutar el script real de Python
+        try {
+          const result = await fetch('http://localhost:8000/run-scraper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (result.ok) {
+            const data = await result.json();
+            alert(`✅ ¡Scraper completado!\n\nMovimientos nuevos: ${data.new_movements || 'N/A'}`);
+            await loadData();
+            return;
+          }
+        } catch (error) {
+          console.log('Local scraper not available, using fallback');
+        }
+      }
       
-      console.log('🏦 BANKINTER: Making API call to /integrations/bankinter/sync-now');
-      
-      // Usar el endpoint que funciona automáticamente
+      console.log('🏦 BANKINTER: Using production endpoint');
       const response = await api.post('/integrations/bankinter/sync-now', {}, {
-        timeout: 180000 // 3 minutos timeout
+        timeout: 30000
       });
       
       console.log('🏦 BANKINTER: API call completed, status:', response.status);

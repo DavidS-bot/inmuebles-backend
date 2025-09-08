@@ -20,7 +20,10 @@ export default function LoginPage() {
       formData.append('username', email);
       formData.append('password', password);
       
+      console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
       console.log("Sending login request:", { email, password: "***" });
+      console.log("FormData:", Object.fromEntries(formData));
+      
       const res = await api.post("/auth/login", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" }
       });
@@ -28,7 +31,21 @@ export default function LoginPage() {
       const token = res.data?.access_token;
       if (!token) throw new Error("Token no recibido");
       persistToken(token);
-      r.push("/dashboard");
+      
+      // Check if user is new (has no properties)
+      try {
+        const propertiesRes = await api.get("/properties", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (propertiesRes.data.length === 0) {
+          r.push("/onboarding");
+        } else {
+          r.push("/financial-agent");
+        }
+      } catch (err) {
+        // If properties check fails, go to onboarding
+        r.push("/onboarding");
+      }
     } catch (err: any) {
       console.error("Login error:", err);
       console.error("Error response:", err?.response?.data);

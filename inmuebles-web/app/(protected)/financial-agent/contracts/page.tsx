@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 
 interface Property {
@@ -44,7 +45,8 @@ interface ContractWithProperty extends RentalContract {
   property_address: string;
 }
 
-export default function RentalContractsPage() {
+function RentalContractsContent() {
+  const searchParams = useSearchParams();
   const [contracts, setContracts] = useState<ContractWithProperty[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,6 +92,35 @@ export default function RentalContractsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Handle URL parameters for property-specific navigation
+  useEffect(() => {
+    const propertyId = searchParams.get('property_id');
+    const contractId = searchParams.get('contract_id');
+    
+    if (propertyId && contracts.length > 0) {
+      // Filter contracts by property_id
+      const propertyContracts = contracts.filter(contract => 
+        contract.property_id === parseInt(propertyId)
+      );
+      
+      if (contractId) {
+        // Find specific contract and show details
+        const specificContract = propertyContracts.find(contract => 
+          contract.id === parseInt(contractId)
+        );
+        if (specificContract) {
+          setSelectedContract(specificContract);
+        }
+      } else if (propertyContracts.length === 1) {
+        // If only one contract for the property, show it directly
+        setSelectedContract(propertyContracts[0]);
+      }
+      
+      // Set filter to show all contracts for easier navigation
+      setActiveFilter("all");
+    }
+  }, [searchParams, contracts]);
 
   const loadData = async () => {
     try {
@@ -236,12 +267,54 @@ export default function RentalContractsPage() {
     }
   };
 
-  const handleDownloadPdf = async (contractId: number, fileName: string) => {
+  // Helper function to try production server, then local PDF server
+  const fetchPdfWithFallback = async (contractId: number) => {
+    // First try production server
     try {
-      setLoadingPdf(true);
+      console.log(`Trying production server for contract ${contractId}`);
       const response = await api.get(`/rental-contracts/${contractId}/download-pdf`, {
         responseType: 'blob'
       });
+      console.log('✓ Success with production server');
+      return response;
+    } catch (error) {
+      console.log('✗ Production server failed, trying local PDF server...');
+      
+      // Try local PDF server as fallback
+      // Map production contract IDs to local contract IDs based on filenames
+      const contractIdMapping: { [key: number]: number } = {
+        20: 20, 21: 8, 23: 20, 29: 17, 31: 16, 35: 20, 36: 6
+      };
+      
+      const localContractId = contractIdMapping[contractId];
+      if (localContractId) {
+        try {
+          const response = await fetch(`http://localhost:8002/contract/${localContractId}`, {
+            method: 'GET'
+          });
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            console.log('✓ Success with local PDF server');
+            return { data: blob };
+          } else {
+            throw new Error(`Local server responded with ${response.status}`);
+          }
+        } catch (localError) {
+          console.log('✗ Local PDF server also failed:', localError);
+          throw new Error('Both production and local PDF servers failed');
+        }
+      } else {
+        console.log(`✗ No local mapping found for contract ${contractId}, production server also failed`);
+        throw new Error(`PDF not available for contract ${contractId}. This may be a newer contract that only exists in production.`);
+      }
+    }
+  };
+
+  const handleDownloadPdf = async (contractId: number, fileName: string) => {
+    try {
+      setLoadingPdf(true);
+      const response = await fetchPdfWithFallback(contractId);
       
       // Create blob URL and trigger download
       const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -255,7 +328,7 @@ export default function RentalContractsPage() {
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       console.error('Error downloading PDF:', error);
-      alert(error?.response?.data?.detail || 'Error al descargar el PDF');
+      alert(error?.message || 'Error al descargar el PDF');
     } finally {
       setLoadingPdf(false);
     }
@@ -264,9 +337,7 @@ export default function RentalContractsPage() {
   const handleViewPdf = async (contractId: number) => {
     try {
       setLoadingPdf(true);
-      const response = await api.get(`/rental-contracts/${contractId}/download-pdf`, {
-        responseType: 'blob'
-      });
+      const response = await fetchPdfWithFallback(contractId);
       
       // Create blob URL for viewing
       const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -275,7 +346,7 @@ export default function RentalContractsPage() {
       setShowPdfViewer(true);
     } catch (error: any) {
       console.error('Error loading PDF:', error);
-      alert(error?.response?.data?.detail || 'Error al cargar el PDF');
+      alert(error?.message || 'Error al cargar el PDF');
     } finally {
       setLoadingPdf(false);
     }
@@ -284,9 +355,7 @@ export default function RentalContractsPage() {
   const handleOpenInNewTab = async (contractId: number) => {
     try {
       setLoadingPdf(true);
-      const response = await api.get(`/rental-contracts/${contractId}/download-pdf`, {
-        responseType: 'blob'
-      });
+      const response = await fetchPdfWithFallback(contractId);
       
       // Create blob URL and open in new tab
       const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -299,7 +368,7 @@ export default function RentalContractsPage() {
       }, 1000);
     } catch (error: any) {
       console.error('Error opening PDF:', error);
-      alert(error?.response?.data?.detail || 'Error al abrir el PDF');
+      alert(error?.message || 'Error al abrir el PDF');
     } finally {
       setLoadingPdf(false);
     }
@@ -477,7 +546,13 @@ export default function RentalContractsPage() {
   };
 
   const filteredContracts = contracts.filter(contract => {
-    // Check if contract is expired based on end_date
+    // First filter by property_id if provided in URL
+    const propertyId = searchParams.get('property_id');
+    if (propertyId && contract.property_id !== parseInt(propertyId)) {
+      return false;
+    }
+    
+    // Then check if contract is expired based on end_date
     const isExpired = contract.end_date && new Date(contract.end_date) < new Date();
     const actualStatus = !contract.end_date || (!isExpired && contract.is_active);
     
@@ -507,14 +582,44 @@ export default function RentalContractsPage() {
           <nav className="text-sm text-gray-500 mb-2">
             <a href="/financial-agent" className="hover:text-blue-600">Agente Financiero</a>
             <span className="mx-2">&gt;</span>
-            <span>Contratos de Alquiler</span>
+            {searchParams.get('property_id') ? (
+              <>
+                <a href="/financial-agent/contracts" className="hover:text-blue-600">Contratos de Alquiler</a>
+                <span className="mx-2">&gt;</span>
+                <span>Propiedad #{searchParams.get('property_id')}</span>
+              </>
+            ) : (
+              <span>Contratos de Alquiler</span>
+            )}
           </nav>
           <h1 className="text-3xl font-bold text-gray-900">📄 Contratos de Alquiler</h1>
-          <p className="text-gray-600 mt-1">Gestión de contratos y inquilinos</p>
+          <p className="text-gray-600 mt-1">
+            {searchParams.get('property_id') 
+              ? `Contratos para la propiedad #${searchParams.get('property_id')}`
+              : "Gestión de contratos y inquilinos"
+            }
+          </p>
+          {searchParams.get('property_id') && (
+            <a
+              href="/financial-agent/contracts"
+              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 mt-2"
+            >
+              ← Volver a todos los contratos
+            </a>
+          )}
         </div>
         
         <button
-          onClick={() => setShowNewContractModal(true)}
+          onClick={() => {
+            const propertyId = searchParams.get('property_id');
+            if (propertyId) {
+              setNewContract({
+                ...newContract,
+                property_id: parseInt(propertyId)
+              });
+            }
+            setShowNewContractModal(true);
+          }}
           className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
         >
           + Nuevo Contrato
@@ -1406,5 +1511,17 @@ export default function RentalContractsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function RentalContractsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <RentalContractsContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import Layout from '@/components/Layout';
 
 interface Property {
   id: number;
@@ -31,6 +30,7 @@ export default function ClassificationRulesPage() {
   const [rules, setRules] = useState<RuleWithProperty[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [contracts, setContracts] = useState<RentalContract[]>([]);
+  const [propertyContracts, setPropertyContracts] = useState<RentalContract[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewRuleModal, setShowNewRuleModal] = useState(false);
   const [showTestModal, setShowTestModal] = useState(false);
@@ -53,20 +53,77 @@ export default function ClassificationRulesPage() {
     loadData();
   }, []);
 
+  // Load tenants when property is selected in new rule form
+  useEffect(() => {
+    console.log(`[DEBUG] Property changed to: ${newRule.property_id}`);
+    if (newRule.property_id > 0) {
+      console.log(`[DEBUG] Loading contracts for property ${newRule.property_id}`);
+      loadPropertyContracts(newRule.property_id);
+    } else {
+      console.log('[DEBUG] No property selected, clearing contracts');
+      setPropertyContracts([]);
+    }
+  }, [newRule.property_id]);
+
+  const loadPropertyContracts = async (propertyId: number) => {
+    try {
+      console.log(`[DEBUG] Cargando contratos para propiedad ${propertyId}...`);
+      
+      // Use the correct endpoint that works: /rental-contracts/?property_id=X
+      try {
+        const endpoint = `/rental-contracts/?property_id=${propertyId}`;
+        console.log(`[DEBUG] Usando endpoint: ${endpoint}`);
+        const response = await api.get(endpoint);
+        console.log(`[DEBUG] Contratos encontrados:`, response.data.length);
+        
+        if (response.data && Array.isArray(response.data)) {
+          const validContracts = response.data.filter((contract: any) => 
+            contract.tenant_name && contract.tenant_name.trim()
+          );
+          setPropertyContracts(validContracts);
+          console.log(`[DEBUG] Contratos validos para propiedad ${propertyId}:`, validContracts.length);
+          return;
+        }
+      } catch (error) {
+        console.log(`[DEBUG] Endpoint principal fallo:`, error);
+      }
+      
+      // Fallback: filter from all contracts if main endpoint fails
+      console.log("[DEBUG] Usando fallback - filtrando de todos los contratos");
+      const filteredContracts = contracts.filter((contract: any) => 
+        contract.property_id === propertyId && contract.tenant_name?.trim()
+      );
+      setPropertyContracts(filteredContracts);
+      console.log(`[DEBUG] Contratos filtrados:`, filteredContracts.length);
+      
+    } catch (error) {
+      console.error("Error loading property contracts:", error);
+      setPropertyContracts([]);
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
       
-      // Load properties
-      const propertiesRes = await api.get("/properties");
-      setProperties(propertiesRes.data);
+      // Load properties (handle gracefully if endpoint fails)
+      let propertiesData: Property[] = [];
+      try {
+        const propertiesRes = await api.get("/properties");
+        propertiesData = propertiesRes.data;
+        setProperties(propertiesData);
+        console.log("✓ [DEBUG] Propiedades cargadas:", propertiesData.length);
+      } catch (propertiesError) {
+        console.warn("⚠️ [DEBUG] Properties endpoint failed, continuing without properties:", propertiesError);
+        setProperties([]);
+      }
 
       // Load rules - FIXED: use trailing slash
       const rulesRes = await api.get("/classification-rules/");
       
       // Enrich rules with property info
       const enrichedRules = rulesRes.data.map((rule: ClassificationRule) => {
-        const property = propertiesRes.data.find((p: Property) => p.id === rule.property_id);
+        const property = propertiesData.find((p: Property) => p.id === rule.property_id);
         return {
           ...rule,
           property_address: property?.address || "Propiedad desconocida"
@@ -75,11 +132,13 @@ export default function ClassificationRulesPage() {
 
       setRules(enrichedRules);
 
-      // Load contracts for tenant names
+      // Load contracts for tenant names - FIXED: use trailing slash
       try {
-        const contractsRes = await api.get("/rental-contracts");
+        const contractsRes = await api.get("/rental-contracts/");
         setContracts(contractsRes.data);
+        console.log("[DEBUG] Todos los contratos cargados:", contractsRes.data.length);
       } catch (error) {
+        console.warn("[DEBUG] Error cargando contratos:", error);
         setContracts([]);
       }
     } catch (error) {
@@ -184,21 +243,28 @@ export default function ClassificationRulesPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">⚙️ Reglas de Clasificación</h1>
+            <p className="text-gray-600 mt-1">Cargando información...</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <Layout
-      title="⚙️ Reglas de Clasificación"
-      subtitle="Configurar clasificación automática de movimientos"
-      breadcrumbs={[
-        { label: 'Agente Financiero', href: '/financial-agent' },
-        { label: 'Reglas de Clasificación', href: '/financial-agent/rules' }
-      ]}
-      actions={
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">⚙️ Reglas de Clasificación</h1>
+          <p className="text-gray-600 mt-1">Configurar clasificación automática de movimientos</p>
+        </div>
         <div className="flex space-x-3">
           <a
             href="/financial-agent/rules/extract"
@@ -220,8 +286,7 @@ export default function ClassificationRulesPage() {
             + Nueva Regla
           </button>
         </div>
-      }
-    >
+      </div>
       <div className="space-y-6">
 
       {/* Summary Cards */}
@@ -342,7 +407,7 @@ export default function ClassificationRulesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Propiedad</label>
                 <select
                   value={newRule.property_id}
-                  onChange={(e) => setNewRule({...newRule, property_id: Number(e.target.value)})}
+                  onChange={(e) => setNewRule({...newRule, property_id: Number(e.target.value), tenant_name: ""})}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                   required
                 >
@@ -405,12 +470,20 @@ export default function ClassificationRulesPage() {
                     className="w-full border border-gray-300 rounded-md px-3 py-2"
                   >
                     <option value="">Sin asociar</option>
-                    {contracts.map((contract, index) => (
+                    {propertyContracts.map((contract, index) => (
                       <option key={index} value={contract.tenant_name}>
                         {contract.tenant_name}
                       </option>
                     ))}
                   </select>
+                  {newRule.property_id > 0 && propertyContracts.length === 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      No se encontraron inquilinos para esta propiedad
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    [DEBUG] Contratos disponibles: {propertyContracts.length} | Propiedad: {newRule.property_id}
+                  </p>
                 </div>
               )}
 
@@ -539,6 +612,6 @@ COMUNIDAD PROPIETARIOS`}
         </div>
       )}
       </div>
-    </Layout>
+    </div>
   );
 }

@@ -96,6 +96,17 @@ export default function PropertyReportsPage() {
     return (summary.net_cash_flow / property.purchase_price) * 100;
   };
 
+  const calculateMonthlyAverage = (total: number) => {
+    if (!monthlyData || monthlyData.length === 0) return total / 12;
+    
+    // Count months that have actual data (non-zero income or expenses)
+    const monthsWithData = monthlyData.filter(month => 
+      month.income > 0 || month.expenses > 0 || month.movements_count > 0
+    ).length;
+    
+    return monthsWithData > 0 ? total / monthsWithData : total / 12;
+  };
+
   const getYearOptions = () => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -310,13 +321,13 @@ export default function PropertyReportsPage() {
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <p className="text-2xl font-bold text-green-600">
-              {summary?.total_income ? formatCurrency(summary.total_income / 12) : '€0'}
+              {summary?.total_income ? formatCurrency(calculateMonthlyAverage(summary.total_income)) : '€0'}
             </p>
             <p className="text-sm text-gray-600">Ingreso Promedio Mensual</p>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <p className="text-2xl font-bold text-purple-600">
-              {summary?.net_cash_flow ? formatCurrency(summary.net_cash_flow / 12) : '€0'}
+              {summary?.net_cash_flow ? formatCurrency(calculateMonthlyAverage(summary.net_cash_flow)) : '€0'}
             </p>
             <p className="text-sm text-gray-600">Cash Flow Promedio Mensual</p>
           </div>

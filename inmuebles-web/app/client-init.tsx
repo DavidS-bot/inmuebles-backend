@@ -2,9 +2,16 @@
 import { useEffect, useState } from "react";
 import { loadTokenFromStorage } from "@/lib/auth";
 
-// Hook para PWA
+// Hook para PWA - Fixed
 function usePWA() {
+  const [mounted, setMounted] = useState(false);
+  
   useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  useEffect(() => {
+    if (!mounted) return;
     // Registrar Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
@@ -32,27 +39,12 @@ function usePWA() {
         });
     }
 
-    // Detectar instalación PWA
+    // Detectar instalación PWA - DESHABILITADO
     let deferredPrompt: any;
     const installPromptHandler = (e: Event) => {
       e.preventDefault();
       deferredPrompt = e;
-      
-      // Mostrar botón de instalación después de un tiempo
-      setTimeout(() => {
-        const shouldShow = !localStorage.getItem('pwa-install-dismissed') &&
-                          !window.matchMedia('(display-mode: standalone)').matches;
-        
-        if (shouldShow && confirm('¿Quieres instalar Inmuebles como una app en tu dispositivo?')) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult: any) => {
-            if (choiceResult.outcome === 'dismissed') {
-              localStorage.setItem('pwa-install-dismissed', 'true');
-            }
-            deferredPrompt = null;
-          });
-        }
-      }, 5000);
+      // PWA install popup deshabilitado - no mostrar popup automático
     };
 
     window.addEventListener('beforeinstallprompt', installPromptHandler);
@@ -80,7 +72,7 @@ function usePWA() {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
     };
-  }, []);
+  }, [mounted]);
 }
 
 export default function ClientInit() {
@@ -90,72 +82,11 @@ export default function ClientInit() {
     loadTokenFromStorage(); 
   }, []);
   
-  return (
-    <PWAInstallButton />
-  );
+  return null;
 }
 
-// Componente para botón de instalación manual
+// Componente para botón de instalación manual - DESHABILITADO
 function PWAInstallButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showButton, setShowButton] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowButton(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    
-    // Mostrar botón después de 10 segundos si no está instalado
-    const timer = setTimeout(() => {
-      if (!window.matchMedia('(display-mode: standalone)').matches) {
-        setShowButton(true);
-      }
-    }, 10000);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  const handleInstall = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
-        setDeferredPrompt(null);
-        setShowButton(false);
-      });
-    } else {
-      // Fallback manual
-      alert('Para instalar como app:\n\n📱 Android: Menú ⋮ → "Instalar app"\n🍎 iPhone: Compartir 📤 → "Añadir a pantalla de inicio"');
-    }
-  };
-
-  if (!showButton) return null;
-
-  return (
-    <div 
-      onClick={handleInstall}
-      style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        zIndex: 1000,
-        backgroundColor: '#14b8a6',
-        color: 'white',
-        padding: '12px 20px',
-        borderRadius: '25px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        boxShadow: '0 4px 12px rgba(52, 152, 219, 0.3)',
-      }}
-    >
-      📱 Instalar App
-    </div>
-  );
+  // PWA install button deshabilitado - no mostrar botón flotante
+  return null;
 }

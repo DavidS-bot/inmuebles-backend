@@ -60,8 +60,8 @@ export default function PropertyClassificationRulesPage() {
       const propertyRes = await api.get(`/properties/${propertyId}`);
       setProperty(propertyRes.data);
 
-      // Load rules for this property
-      const rulesRes = await api.get("/classification-rules");
+      // Load rules for this property - FIXED: use trailing slash for consistency
+      const rulesRes = await api.get("/classification-rules/");
       const propertyRules = rulesRes.data.filter((rule: ClassificationRule) => rule.property_id === propertyId);
       setRules(propertyRules);
 

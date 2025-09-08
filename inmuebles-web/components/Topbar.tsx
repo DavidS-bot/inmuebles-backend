@@ -3,7 +3,7 @@ import { persistToken } from "@/lib/auth";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import PWAInstallButton from "./PWAInstallButton";
+import SmartNotificationSystem from "./SmartNotificationSystem";
 
 export default function Topbar() {
   const router = useRouter();
@@ -13,7 +13,8 @@ export default function Topbar() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: "🏠", description: "Vista general" },
     { href: "/dashboard/properties", label: "Propiedades", icon: "🏘️", description: "Gestionar inmuebles" },
-    { href: "/financial-agent", label: "Agente Financiero", icon: "🏛️", description: "Análisis financiero" }
+    { href: "/financial-agent", label: "Agente Financiero", icon: "🏛️", description: "Análisis financiero" },
+    { href: "/notifications", label: "Notificaciones", icon: "🔔", description: "Centro inteligente" }
   ];
 
   const handleLogout = () => {
@@ -33,7 +34,6 @@ export default function Topbar() {
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                 </svg>
               </div>
-              <span className="font-bold text-xl text-gray-900 hidden sm:block">InmueblesApp</span>
             </Link>
             
             {/* Desktop Navigation */}
@@ -63,6 +63,9 @@ export default function Topbar() {
 
           {/* Right side items */}
           <div className="flex items-center space-x-4">
+            {/* Smart Notifications */}
+            <SmartNotificationSystem />
+
             {/* Quick actions */}
             <div className="hidden lg:flex items-center space-x-2">
               <Link
@@ -75,7 +78,6 @@ export default function Topbar() {
 
             {/* User menu */}
             <div className="flex items-center space-x-3">
-              <PWAInstallButton />
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"

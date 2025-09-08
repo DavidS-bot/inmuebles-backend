@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import Layout from '@/components/Layout';
 
 interface PropertyMetrics {
   property: {
@@ -48,6 +47,9 @@ interface PropertyMetrics {
 interface PortfolioSummary {
   total_properties: number;
   total_investment: number;
+  total_property_value?: number;  // Added for new backend fields
+  total_debt?: number;            // Added for new backend fields
+  net_equity?: number;            // Added for new backend fields
   total_income: number;
   total_expenses: number;
   total_net_income: number;
@@ -93,6 +95,7 @@ export default function AnalyticsPage() {
     }
   }, [properties, year]);
 
+
   const fetchPortfolioSummary = async () => {
     try {
       const response = await api.get(`/analytics/portfolio-summary?year=${year}`);
@@ -118,9 +121,8 @@ export default function AnalyticsPage() {
 
   const fetchMarketData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/integrations/market-prices');
-      const result = await response.json();
-      setMarketData(result.market_data || []);
+      const response = await api.get('/integrations/market-prices');
+      setMarketData(response.data.market_data || []);
     } catch (error) {
       console.error("Error fetching market data:", error);
     }
@@ -129,12 +131,9 @@ export default function AnalyticsPage() {
   const fetchAllPropertyMetrics = async () => {
     try {
       if (properties.length > 0) {
-        console.log("Fetching metrics for", properties.length, "properties");
         const metricsPromises = properties.map(async (property) => {
           try {
-            console.log(`Fetching metrics for property ${property.id}`);
             const response = await api.get(`/analytics/dashboard/${property.id}?year=${year}`);
-            console.log(`Received metrics for property ${property.id}:`, response.data);
             return response.data;
           } catch (error) {
             console.error(`Error fetching metrics for property ${property.id}:`, error);
@@ -144,7 +143,6 @@ export default function AnalyticsPage() {
         
         const allMetrics = await Promise.all(metricsPromises);
         const validMetrics = allMetrics.filter(m => m !== null);
-        console.log("Valid metrics received:", validMetrics.length);
         setAllPropertyMetrics(validMetrics);
       }
     } catch (error) {
@@ -186,35 +184,48 @@ export default function AnalyticsPage() {
     
     return {
       value: marketInfo?.estimated_value || 0,
-      source: marketInfo?.source || 'Fotocasa',
+      source: marketInfo?.source || 'Integrated Market APIs',
       date: marketInfo?.last_updated || '2024-12-01',
       trend: marketInfo?.market_trend || 'stable'
     };
   };
 
   if (loading) {
-    return <div className="p-6">Cargando analytics...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+            <p className="text-gray-600 mt-1">Cargando información...</p>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
   }
 
   // Calculate totals from all properties using individual property metrics
   const calculateTotals = () => {
+    // Use backend fields if available (after deployment)
+    if (portfolioData?.total_property_value !== undefined && portfolioData?.total_debt !== undefined) {
+      console.log("Using backend calculated totals");
+      return {
+        totalValue: portfolioData.total_property_value,
+        totalDebt: portfolioData.total_debt,
+        totalEquity: portfolioData.net_equity || (portfolioData.total_property_value - portfolioData.total_debt)
+      };
+    }
+    
+    // Fallback to frontend calculation
     let totalValue = 0;
     let totalDebt = 0;
     
-    console.log("=== DEBUG CALCULATE TOTALS ===");
-    console.log("allPropertyMetrics length:", allPropertyMetrics.length);
-    console.log("portfolioData properties_performance:", portfolioData?.properties_performance?.length);
-    console.log("properties length:", properties.length);
     
     if (allPropertyMetrics.length > 0) {
       // Use actual property metrics with mortgage info
-      console.log("Using allPropertyMetrics for calculations");
       for (const metrics of allPropertyMetrics) {
-        console.log(`Property ${metrics.property.id}:`, {
-          has_mortgage: metrics.mortgage_info?.has_mortgage,
-          outstanding_balance: metrics.mortgage_info?.outstanding_balance,
-          initial_debt: metrics.property.initial_debt
-        });
         
         // Get current property value (use market valuation or fallback to property value)
         const marketValuation = getMarketValuation(metrics.property.id, metrics.property.address);
@@ -224,17 +235,14 @@ export default function AnalyticsPage() {
         
         // Use actual outstanding balance from individual property mortgage info
         if (metrics.mortgage_info?.has_mortgage && metrics.mortgage_info.outstanding_balance > 0) {
-          console.log(`Adding debt: ${metrics.mortgage_info.outstanding_balance}`);
           totalDebt += metrics.mortgage_info.outstanding_balance;
         } else if (metrics.property.initial_debt && metrics.property.initial_debt > 0) {
           // Fallback to initial debt if outstanding balance not available
-          console.log(`Using initial debt as fallback: ${metrics.property.initial_debt}`);
           totalDebt += metrics.property.initial_debt;
         }
       }
     } else if (portfolioData?.properties_performance) {
       // Fallback to portfolio data if individual metrics not available
-      console.log("Using portfolioData fallback for calculations");
       for (const prop of portfolioData.properties_performance) {
         const marketValuation = getMarketValuation(prop.id, prop.address);
         const currentValue = marketValuation.value || prop.current_value || prop.total_investment || prop.investment;
@@ -243,16 +251,12 @@ export default function AnalyticsPage() {
         
         // Get property from properties array for debt info
         const property = properties.find(p => p.id === prop.id);
-        console.log(`Property ${prop.id} debt info:`, property?.initial_debt);
         if (property?.initial_debt && property.initial_debt > 0) {
-          console.log(`Adding debt from property: ${property.initial_debt}`);
           totalDebt += property.initial_debt;
         }
       }
     }
     
-    console.log("Final totals:", { totalValue, totalDebt });
-    console.log("=== END DEBUG ===");
     
     // Equity = Total Value - Total Debt (correct formula)
     const totalEquity = totalValue - totalDebt;
@@ -260,17 +264,17 @@ export default function AnalyticsPage() {
     return { totalValue, totalEquity, totalDebt };
   };
   
-  const totals = calculateTotals();
+  // Only calculate totals when we have all required data
+  const totals = (portfolioData && marketData.length > 0) ? calculateTotals() : { totalValue: 0, totalEquity: 0, totalDebt: 0 };
 
   return (
-    <Layout
-      title="Dashboard de Analytics"
-      subtitle="Análisis financiero detallado de tu cartera inmobiliaria"
-      breadcrumbs={[
-        { label: 'Agente Financiero', href: '/financial-agent' },
-        { label: 'Analytics', href: '/financial-agent/analytics' }
-      ]}
-      actions={
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">📊 Analytics</h1>
+          <p className="text-gray-600 mt-1">Análisis financiero detallado de tu cartera inmobiliaria</p>
+        </div>
         <select
           value={year}
           onChange={(e) => setYear(Number(e.target.value))}
@@ -280,9 +284,7 @@ export default function AnalyticsPage() {
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
-      }
-    >
-      <div className="space-y-6">
+      </div>
       
       {/* New Total Summary Header with better contrast */}
       <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-lg p-6 shadow-lg">
@@ -377,7 +379,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* Property Performance Table */}
-      {portfolioData && (
+      {portfolioData && marketData.length > 0 && allPropertyMetrics.length > 0 && (
         <div className="bg-white rounded-lg shadow">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold">Rendimiento por Propiedad</h2>
@@ -402,7 +404,14 @@ export default function AnalyticsPage() {
                   const marketValuation = getMarketValuation(prop.id, prop.address);
                   const currentValue = marketValuation.value || prop.current_value || prop.total_investment || prop.investment;
                   const investment = prop.total_investment || prop.investment;
-                  const equity = currentValue - investment;
+                  
+                  // Get property metrics for debt info
+                  const propertyMetrics = allPropertyMetrics.find(m => m.property.id === prop.id);
+                  const propertyDebt = propertyMetrics?.mortgage_info?.outstanding_balance || 0;
+                  
+                  
+                  // Equity = Current Value - Outstanding Debt (correct formula)
+                  const equity = currentValue - propertyDebt;
                   
                   return (
                     <tr key={prop.id} className="border-b hover:bg-gray-50">
@@ -419,7 +428,10 @@ export default function AnalyticsPage() {
                         </div>
                       </td>
                       <td className={`px-4 py-2 text-right font-medium ${equity >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(equity)}
+                        <div>{formatCurrency(equity)}</div>
+                        {propertyDebt > 0 && (
+                          <div className="text-xs text-gray-500">Deuda: {formatCurrency(propertyDebt)}</div>
+                        )}
                       </td>
                       <td className="px-4 py-2 text-right text-green-600">{formatCurrency(prop.income)}</td>
                       <td className="px-4 py-2 text-right text-red-600">{formatCurrency(prop.expenses)}</td>
@@ -644,7 +656,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
       )}
-      </div>
-    </Layout>
+    </div>
   );
 }

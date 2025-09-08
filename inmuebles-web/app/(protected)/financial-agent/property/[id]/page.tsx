@@ -127,9 +127,15 @@ export default function PropertyFinancialDetailsPage() {
         const startDate = `${selectedYear}-01-01`;
         const endDate = `${selectedYear}-12-31`;
         const movementsRes = await api.get(
-          `/financial-movements?property_id=${propertyId}&start_date=${startDate}&end_date=${endDate}`
+          `/financial-movements/?property_id=${propertyId}&start_date=${startDate}&end_date=${endDate}`
         );
-        setMovements(movementsRes.data);
+        // Sort movements by date descending (most recent first)
+        const sortedMovements = movementsRes.data.sort((a: FinancialMovement, b: FinancialMovement) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setMovements(sortedMovements);
       } catch (error) {
         setMovements([]);
       }
@@ -137,7 +143,7 @@ export default function PropertyFinancialDetailsPage() {
       // Load rental contracts
       try {
         const contractsRes = await api.get(
-          `/rental-contracts?property_id=${propertyId}`
+          `/rental-contracts/?property_id=${propertyId}`
         );
         setContracts(contractsRes.data);
       } catch (error) {
@@ -668,7 +674,7 @@ export default function PropertyFinancialDetailsPage() {
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">📄 Contratos de Alquiler</h3>
                 <a
-                  href="/financial-agent/contracts"
+                  href={`/financial-agent/contracts?property_id=${propertyId}`}
                   className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
                 >
                   + Nuevo Contrato
@@ -722,7 +728,7 @@ export default function PropertyFinancialDetailsPage() {
                             </td>
                             <td className="px-4 py-4 text-sm">
                               <a
-                                href="/financial-agent/contracts"
+                                href={`/financial-agent/contracts?property_id=${propertyId}&contract_id=${contract.id}`}
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 Ver Detalles
@@ -738,7 +744,7 @@ export default function PropertyFinancialDetailsPage() {
                 <div className="text-center py-8 text-gray-500">
                   <p>No hay contratos registrados para esta propiedad</p>
                   <a
-                    href="/financial-agent/contracts"
+                    href={`/financial-agent/contracts?property_id=${propertyId}`}
                     className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
                   >
                     Crear primer contrato

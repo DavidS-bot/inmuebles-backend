@@ -195,4 +195,4 @@ Si tienes problemas con el deployment:
 
 1. Revisa los logs: `docker-compose -f docker-compose.prod.yml logs`
 2. Verifica que todos los servicios estén corriendo: `docker-compose -f docker-compose.prod.yml ps`
-3. Comprueba las variables de entorno en `.env.production`
+3. Comprueba las variables de entorno en `.env.production`# Force redeploy ma.,  9 de sep. de 2025  0:51:29

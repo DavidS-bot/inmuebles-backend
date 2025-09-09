@@ -1083,8 +1083,8 @@ async def sync_bankinter_now(
         print("🏦 EJECUTANDO BANKINTER SCRAPING REAL...")
         print("🌐 Iniciando web scraping de datos actualizados...")
         
-        # Execute the real Bankinter scraper
-        script_path = os.path.join(os.path.dirname(__file__), '..', '..', 'bankinter_scraper_final.py')
+        # Execute the smart hybrid Bankinter solution
+        script_path = os.path.join(os.path.dirname(__file__), '..', '..', 'bankinter_hybrid_smart.py')
         
         print(f"📄 Ejecutando scraper real: {script_path}")
         
@@ -1103,40 +1103,46 @@ async def sync_bankinter_now(
         if result.stderr:
             print(f"⚠️ Logs: {result.stderr[:500]}")
         
-        # Parse output for success indicators and CSV file
+        # Parse output for success indicators and result data
         output_str = result.stdout
-        csv_filename = None
-        movements_count = 0
         
-        # Look for CSV filename in output
-        if "CSV con movimientos reales guardado:" in output_str:
-            lines = output_str.split('\n')
-            for line in lines:
-                if "CSV con movimientos reales guardado:" in line:
-                    csv_filename = line.split(': ')[-1].strip()
-                    break
+        # Look for SUCCESS/FAILED markers and JSON result
+        hybrid_result = None
+        if "SUCCESS:" in output_str:
+            try:
+                # Extract the result JSON from output
+                success_line = [line for line in output_str.split('\n') if 'SUCCESS:' in line][0]
+                result_str = success_line.split('SUCCESS: ', 1)[1]
+                import json
+                hybrid_result = json.loads(result_str.replace("'", '"'))
+            except:
+                pass
+        elif "FAILED:" in output_str:
+            try:
+                failed_line = [line for line in output_str.split('\n') if 'FAILED:' in line][0]
+                result_str = failed_line.split('FAILED: ', 1)[1]
+                import json
+                hybrid_result = json.loads(result_str.replace("'", '"'))
+            except:
+                pass
         
-        # Look for movements count
-        if "Total movimientos extraídos:" in output_str:
-            lines = output_str.split('\n')
-            for line in lines:
-                if "Total movimientos extraídos:" in line:
-                    try:
-                        movements_count = int(line.split(':')[-1].strip())
-                    except:
-                        movements_count = 0
-                    break
-        
-        if result.returncode == 0 and ("SCRAPING REAL COMPLETADO EXITOSAMENTE" in output_str or csv_filename):
+        if result.returncode == 0 and hybrid_result and hybrid_result.get("success"):
+            data_source = hybrid_result.get("data_source", "unknown")
+            extraction_method = {
+                "real_scraping": "Selenium WebDriver con login real",
+                "existing_csv": "Datos CSV existentes actualizados",
+                "production_fallback": "Datos de fallback para producción"
+            }.get(data_source, "Método híbrido")
+            
             return {
                 "sync_status": "completed",
-                "message": f"Scraping real de Bankinter completado exitosamente - {movements_count} movimientos extraídos",
-                "details": "Datos obtenidos directamente de la web de Bankinter con información actualizada",
-                "movements_extracted": movements_count,
-                "csv_file": csv_filename,
-                "data_source": "real_web_scraping",
-                "timestamp": datetime.now().isoformat(),
-                "extraction_method": "Selenium WebDriver con login real"
+                "message": hybrid_result.get("message", "Sincronización híbrida completada"),
+                "details": f"Método usado: {data_source}. {hybrid_result.get('message', '')}",
+                "movements_extracted": hybrid_result.get("movements_count", 0),
+                "csv_file": hybrid_result.get("csv_file"),
+                "data_source": data_source,
+                "timestamp": hybrid_result.get("timestamp", datetime.now().isoformat()),
+                "extraction_method": extraction_method
             }
         else:
             return {

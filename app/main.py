@@ -74,6 +74,41 @@ def health():
 def test_auth(current_user = Depends(get_current_user)):
     return {"auth": "ok", "user_id": current_user.id, "user_email": current_user.email}
 
+@app.get("/create-admin-user")
+def create_admin_user():
+    """Create admin user for testing"""
+    try:
+        from .models import User
+        from passlib.context import CryptContext
+        from sqlmodel import Session, select
+        from .db import engine
+        
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        
+        with Session(engine) as session:
+            # Check if admin exists
+            statement = select(User).where(User.email == "admin@admin.com")
+            existing_user = session.exec(statement).first()
+            
+            if existing_user:
+                return {"status": "exists", "message": "Admin user already exists"}
+            
+            # Create admin user
+            hashed_password = pwd_context.hash("admin123")
+            admin_user = User(
+                email="admin@admin.com",
+                hashed_password=hashed_password,
+                is_active=True
+            )
+            
+            session.add(admin_user)
+            session.commit()
+            session.refresh(admin_user)
+            
+            return {"status": "created", "message": "Admin user created successfully", "user_id": admin_user.id}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 @app.get("/init-viability-tables")
 def init_viability_tables():
     """Force creation of viability tables"""

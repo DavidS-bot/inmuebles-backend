@@ -11,6 +11,7 @@ xlrd==2.0.1
 openpyxl
 python-dateutil
 pydantic
+email-validator
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 claude

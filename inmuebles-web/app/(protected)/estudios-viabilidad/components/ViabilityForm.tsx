@@ -44,6 +44,7 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
   const [activeTab, setActiveTab] = useState('general');
   const [calculating, setCalculating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string>('');
 
   const tabs = [
     { id: 'general', label: 'General', icon: Home },
@@ -87,9 +88,14 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
     }
 
     setCalculating(true);
+    setApiError('');
     
     try {
       const token = localStorage.getItem('token');
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+      console.log('Token available:', !!token);
+      console.log('Form data:', formData);
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/viability/`, {
         method: 'POST',
         headers: { 
@@ -99,15 +105,21 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
         body: JSON.stringify(formData)
       });
       
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const newStudy = await response.json();
+        console.log('Study created successfully:', newStudy);
         onStudyCreated(newStudy);
+        onClose();
       } else {
-        const error = await response.json();
-        console.error('Error creating study:', error);
+        const errorData = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+        console.error('Error creating study:', errorData);
+        setApiError(`Error ${response.status}: ${errorData.detail || 'No se pudo crear el estudio'}`);
       }
     } catch (error) {
-      console.error('Error creating study:', error);
+      console.error('Network error:', error);
+      setApiError('Error de conexión. Verifica tu conexión a internet.');
     } finally {
       setCalculating(false);
     }
@@ -557,12 +569,22 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
               </div>
 
               {/* Footer */}
-              <div className="p-6 border-t bg-gray-50 flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  * Campos obligatorios
-                </div>
+              <div className="p-6 border-t bg-gray-50">
+                {apiError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-red-700">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">{apiError}</span>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="flex gap-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-gray-600">
+                    * Campos obligatorios
+                  </div>
+                  
+                  <div className="flex gap-4">
                   <button
                     type="button"
                     onClick={onClose}
@@ -587,6 +609,7 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
                       </>
                     )}
                   </button>
+                  </div>
                 </div>
               </div>
             </form>

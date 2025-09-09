@@ -26,10 +26,16 @@ def download_bankinter_data():
     # Configurar Chrome
     options = uc.ChromeOptions()
     options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    # Remove problematic experimental options
+    # options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    # options.add_experimental_option('useAutomationExtension', False)
     
-    driver = uc.Chrome(options=options)
+    # Force undetected_chromedriver to handle version automatically
+    driver = uc.Chrome(options=options, version_main=None)
     wait = WebDriverWait(driver, 20)
     
     try:

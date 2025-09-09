@@ -1072,11 +1072,13 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Forzar sincronización con Bankinter usando datos CSV directamente"""
+    """Sincronización directa con Bankinter usando datos CSV existentes"""
     
     import os
     import csv
     from datetime import datetime
+    from sqlmodel import select
+    from ..models import FinancialMovement
     
     try:
         print("🏦 EJECUTANDO BANKINTER SYNC DIRECTO...")
@@ -1122,74 +1124,66 @@ async def sync_bankinter_now(
         duplicates = 0
         errors = 0
         
-        from ..models import FinancialMovement
-        
-        for movement in movements_data:
+        for movement_data in movements_data:
             try:
-                # Parse date from DD/MM/YYYY to YYYY-MM-DD
-                fecha_parts = movement['Fecha'].split('/')
-                fecha = f"{fecha_parts[2]}-{fecha_parts[1]}-{fecha_parts[0]}"
+                # Parse date
+                fecha_str = movement_data['Fecha']
+                fecha = datetime.strptime(fecha_str, '%d/%m/%Y').date()
                 
-                # Parse amount (replace comma with dot for decimal)
-                amount = float(movement['Importe'].replace(',', '.'))
-                concept = movement['Concepto']
+                # Parse amount
+                importe_str = movement_data['Importe'].replace(',', '.')
+                importe = float(importe_str)
                 
-                # Check if movement already exists for this user
-                existing = session.query(FinancialMovement).filter(
-                    FinancialMovement.date == fecha,
-                    FinancialMovement.concept == concept,
-                    FinancialMovement.amount == amount,
-                    FinancialMovement.user_id == current_user.id
+                # Check if movement already exists
+                existing = session.exec(
+                    select(FinancialMovement).where(
+                        FinancialMovement.date == fecha,
+                        FinancialMovement.concept == movement_data['Concepto'],
+                        FinancialMovement.amount == importe
+                    )
                 ).first()
                 
                 if existing:
                     duplicates += 1
                     continue
-                    
+                
                 # Create new movement
                 new_movement = FinancialMovement(
                     date=fecha,
-                    concept=concept,
-                    amount=amount,
+                    concept=movement_data['Concepto'],
+                    amount=importe,
                     category="Sin clasificar",
-                    user_id=current_user.id
+                    user_id=current_user.id,
+                    property_id=None  # Will be classified later
                 )
                 
                 session.add(new_movement)
                 uploaded += 1
                 
-                if uploaded % 10 == 0:
-                    print(f"   ✅ Procesados: {uploaded}")
-                
-            except Exception as row_error:
-                print(f"❌ Error procesando movimiento: {row_error}")
+            except Exception as e:
+                print(f"❌ Error procesando movimiento {movement_data}: {e}")
                 errors += 1
-                continue
         
         # Commit all changes
         session.commit()
         
-        print("🎉 Sincronización completada:")
-        print(f"   📈 Movimientos nuevos: {uploaded}")
-        print(f"   🔄 Duplicados omitidos: {duplicates}")
-        print(f"   ❌ Errores: {errors}")
+        print(f"✅ COMPLETADO: {uploaded} nuevos, {duplicates} duplicados, {errors} errores")
         
         return {
             "sync_status": "completed",
-            "message": f"Sincronización de Bankinter completada exitosamente. {uploaded} movimientos agregados, {duplicates} duplicados omitidos.",
+            "message": f"Sincronización completada exitosamente",
             "new_movements": uploaded,
             "duplicates_skipped": duplicates,
-            "total_movements": len(movements_data),
-            "errors": errors
+            "errors": errors,
+            "total_processed": len(movements_data)
         }
         
     except Exception as e:
-        print(f"❌ Error general en Bankinter sync: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"❌ Error en sincronización: {e}")
+        session.rollback()
         return {
             "sync_status": "error",
-            "message": f"Error en sincronización de Bankinter: {str(e)}"
+            "message": f"Error durante la sincronización: {str(e)}"
         }
 
 @router.get("/bankinter/sync-progress/{user_id}")

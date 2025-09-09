@@ -8,7 +8,7 @@ from .routers import (
     financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local, viability
 )
 
-app = FastAPI(title="Inmuebles API", version="0.1.0")
+app = FastAPI(title="Inmuebles API", version="0.1.1")
 
 app.add_middleware(
     CORSMiddleware,

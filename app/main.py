@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from .db import init_db
+from .db import init_db, get_session
 from .deps import get_current_user
 from .routers import (
     properties, rules, movements, cashflow, auth,
@@ -54,7 +54,21 @@ def on_startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "0.1.2", "viability_module": "enabled", "timestamp": "2025-01-09"}
+    from sqlmodel import text
+    try:
+        with get_session() as session:
+            # Check if viability tables exist
+            result = session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'viability%';"))
+            tables = [row[0] for row in result.fetchall()]
+            return {
+                "status": "ok", 
+                "version": "0.1.2", 
+                "viability_module": "enabled", 
+                "timestamp": "2025-01-09",
+                "viability_tables": tables
+            }
+    except Exception as e:
+        return {"status": "ok", "version": "0.1.2", "viability_module": "enabled", "timestamp": "2025-01-09", "db_error": str(e)}
 
 @app.get("/test-auth")
 def test_auth(current_user = Depends(get_current_user)):

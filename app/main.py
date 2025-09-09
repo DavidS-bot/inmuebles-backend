@@ -74,6 +74,21 @@ def health():
 def test_auth(current_user = Depends(get_current_user)):
     return {"auth": "ok", "user_id": current_user.id, "user_email": current_user.email}
 
+@app.get("/init-viability-tables")
+def init_viability_tables():
+    """Force creation of viability tables"""
+    try:
+        from .models import ViabilityStudy, ViabilityProjection
+        from sqlmodel import SQLModel, create_engine
+        from .config import settings
+        
+        engine = create_engine(settings.database_url)
+        SQLModel.metadata.create_all(engine)
+        
+        return {"status": "success", "message": "Viability tables created/updated"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 @app.get("/debug/routes")
 def debug_routes():
     """Debug endpoint to check all available routes"""

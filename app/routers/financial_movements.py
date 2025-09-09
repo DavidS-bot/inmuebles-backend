@@ -408,7 +408,7 @@ def update_financial_movement(
 def delete_movements_by_date_range(
     start_date: str,
     end_date: str,
-    property_id: Optional[int] = None,
+    property_id: Optional[str] = None,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
@@ -434,14 +434,20 @@ def delete_movements_by_date_range(
         property_ids = [prop.id for prop in user_properties]
         
         # Build the query
-        if property_id:
+        if property_id and property_id.strip():
+            # Convert property_id to int and validate
+            try:
+                property_id_int = int(property_id)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="property_id must be a valid integer")
+            
             # Specific property - check if user owns it
-            if property_id not in property_ids:
+            if property_id_int not in property_ids:
                 raise HTTPException(status_code=403, detail="Property not found or access denied")
             
             movements = session.exec(
                 select(FinancialMovement).where(
-                    (FinancialMovement.property_id == property_id) &
+                    (FinancialMovement.property_id == property_id_int) &
                     (FinancialMovement.date >= start_date_obj) &
                     (FinancialMovement.date <= end_date_obj)
                 )

@@ -1072,68 +1072,92 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Sincronización simplificada con Bankinter - Verificación de datos disponibles"""
+    """Sincronización REAL con Bankinter - Web scraping actualizado"""
     
+    import subprocess
+    import sys
     import os
     from datetime import datetime
     
     try:
-        print("🏦 EJECUTANDO BANKINTER SYNC SIMPLIFICADO...")
+        print("🏦 EJECUTANDO BANKINTER SCRAPING REAL...")
+        print("🌐 Iniciando web scraping de datos actualizados...")
         
-        # Check if CSV data exists
-        csv_file = "bankinter_agente_financiero_20250828_105840.csv"
-        csv_paths = [
-            csv_file,
-            f"app/{csv_file}",
-            os.path.join(os.path.dirname(__file__), '..', '..', csv_file)
-        ]
+        # Execute the real Bankinter scraper
+        script_path = os.path.join(os.path.dirname(__file__), '..', '..', 'bankinter_scraper_final.py')
         
-        found_csv = None
-        for path in csv_paths:
-            if os.path.exists(path):
-                found_csv = path
-                break
+        print(f"📄 Ejecutando scraper real: {script_path}")
         
-        if found_csv:
-            # Count movements in CSV
-            try:
-                with open(found_csv, 'r', encoding='utf-8-sig') as f:
-                    lines = f.readlines()
-                    movement_count = len(lines) - 1  # Subtract header
-                
-                print(f"✅ Found {movement_count} movements in CSV at {found_csv}")
-                print("🔄 CSV data is available for processing")
-                print("📊 Movements ready for import")
-                
-                return {
-                    "sync_status": "completed",
-                    "message": f"Bankinter data verified - {movement_count} movements available", 
-                    "details": "CSV data found and ready for import. Use the Excel upload feature to import these movements.",
-                    "movements_found": movement_count,
-                    "csv_file": found_csv,
-                    "timestamp": datetime.now().isoformat(),
-                    "instructions": "To import these movements: 1) Download the CSV file, 2) Convert to Excel if needed, 3) Use the 'Upload Excel' button in the movements page"
-                }
-            except Exception as e:
-                print(f"❌ Error reading CSV: {e}")
-                return {
-                    "sync_status": "error",
-                    "message": f"Error reading CSV file: {str(e)}"
-                }
+        # Run the real scraper with timeout
+        result = subprocess.run(
+            [sys.executable, script_path], 
+            capture_output=True, 
+            text=True, 
+            timeout=300,  # 5 minute timeout for real scraping
+            cwd=os.path.dirname(os.path.dirname(__file__)) or '.'
+        )
+        
+        print(f"📋 Resultado del scraping: código {result.returncode}")
+        print(f"📊 Salida: {result.stdout[:1000]}")
+        
+        if result.stderr:
+            print(f"⚠️ Logs: {result.stderr[:500]}")
+        
+        # Parse output for success indicators and CSV file
+        output_str = result.stdout
+        csv_filename = None
+        movements_count = 0
+        
+        # Look for CSV filename in output
+        if "CSV con movimientos reales guardado:" in output_str:
+            lines = output_str.split('\n')
+            for line in lines:
+                if "CSV con movimientos reales guardado:" in line:
+                    csv_filename = line.split(': ')[-1].strip()
+                    break
+        
+        # Look for movements count
+        if "Total movimientos extraídos:" in output_str:
+            lines = output_str.split('\n')
+            for line in lines:
+                if "Total movimientos extraídos:" in line:
+                    try:
+                        movements_count = int(line.split(':')[-1].strip())
+                    except:
+                        movements_count = 0
+                    break
+        
+        if result.returncode == 0 and ("SCRAPING REAL COMPLETADO EXITOSAMENTE" in output_str or csv_filename):
+            return {
+                "sync_status": "completed",
+                "message": f"Scraping real de Bankinter completado exitosamente - {movements_count} movimientos extraídos",
+                "details": "Datos obtenidos directamente de la web de Bankinter con información actualizada",
+                "movements_extracted": movements_count,
+                "csv_file": csv_filename,
+                "data_source": "real_web_scraping",
+                "timestamp": datetime.now().isoformat(),
+                "extraction_method": "Selenium WebDriver con login real"
+            }
         else:
-            print("❌ No CSV data found")
             return {
                 "sync_status": "error", 
-                "message": "No Bankinter CSV data found in any expected location", 
-                "details": f"Searched for: {', '.join(csv_paths)}",
-                "instructions": "Please ensure the Bankinter CSV file exists or try real scraping if in a local environment"
+                "message": f"Error en scraping real de Bankinter - código {result.returncode}",
+                "details": result.stdout[:500] if result.stdout else "No output",
+                "stderr": result.stderr[:500] if result.stderr else "No errors",
+                "data_source": "scraping_failed"
             }
             
+    except subprocess.TimeoutExpired:
+        return {
+            "sync_status": "timeout",
+            "message": "El scraping real tardó más de 5 minutos. Proceso cancelado.",
+            "details": "Scraping web puede tardar debido a carga de página y autenticación"
+        }
     except Exception as e:
-        print(f"❌ ERROR: {str(e)}")
+        print(f"❌ Error ejecutando scraper real: {e}")
         return {
             "sync_status": "error",
-            "message": f"Sync error: {str(e)}"
+            "message": f"Error en scraping real de Bankinter: {str(e)}"
         }
 
 @router.get("/bankinter/sync-progress/{user_id}")

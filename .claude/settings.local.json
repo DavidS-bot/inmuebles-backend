@@ -87,7 +87,8 @@
       "Read(/C:\\Users\\davsa\\inmuebles/**)",
       "Read(//c/Users/davsa/inmuebles/**)",
       "Read(/C:\\Users\\davsa\\inmuebles/**)",
-      "Read(//c/Users/davsa/**)"
+      "Read(//c/Users/davsa/**)",
+      "Bash(git remote get-url:*)"
     ],
     "deny": [],
     "ask": []

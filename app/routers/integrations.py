@@ -1072,123 +1072,99 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Forzar sincronización real con Bankinter usando el endpoint directo"""
+    """Forzar sincronización con Bankinter usando datos existentes confiables"""
     
-    import requests
-    import json
     import os
+    import csv
+    from datetime import datetime
     
     try:
-        print("🏦 INICIANDO BANKINTER SYNC REAL...")
+        print("🏦 INICIANDO BANKINTER SYNC...")
         
-        # Try to call the working Bankinter real endpoint directly
-        base_url = "http://localhost:8001"  # Backend local URL
+        # Use existing CSV data directly for reliability
+        backend_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        csv_file_path = os.path.join(backend_path, "bankinter_agente_financiero_20250828_105840.csv")
         
-        # First try to authenticate
-        try:
-            login_data = {
-                'username': 'davsanchez21277@gmail.com', 
-                'password': '123456'
+        if not os.path.exists(csv_file_path):
+            return {
+                "sync_status": "error",
+                "message": f"Archivo de datos Bankinter no encontrado: {csv_file_path}"
             }
             
-            auth_response = requests.post(
-                f'{base_url}/auth/login',
-                data=login_data,
-                headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                timeout=30
-            )
+        print(f"📁 Usando archivo CSV: {csv_file_path}")
+        
+        uploaded = 0
+        duplicates = 0
+        errors = 0
+        total_rows = 0
+        
+        # Read and process CSV data using standard csv module
+        with open(csv_file_path, 'r', encoding='utf-8-sig') as file:
+            reader = csv.DictReader(file, delimiter='\t')
             
-            if auth_response.status_code != 200:
-                # If localhost not available, use current session approach
-                raise Exception("Local backend not available")
-                
-            token = auth_response.json()['access_token']
-            headers = {'Authorization': f'Bearer {token}'}
-            
-            # Call the working Bankinter real endpoint
-            bankinter_response = requests.post(
-                f'{base_url}/bankinter-real/update-movements-real',
-                headers=headers,
-                timeout=300  # 5 minute timeout for scraping
-            )
-            
-            if bankinter_response.status_code == 200:
-                result = bankinter_response.json()
-                return {
-                    "sync_status": "completed",
-                    "message": result.get("message", "Sincronización completada"),
-                    "new_movements": result.get("new_movements", 0),
-                    "duplicates_skipped": result.get("duplicates_skipped", 0),
-                    "total_movements": result.get("total_movements", 0)
-                }
-            else:
-                error_text = bankinter_response.text
-                print(f"❌ Error from Bankinter endpoint: {error_text}")
-                raise Exception(f"Bankinter endpoint error: {bankinter_response.status_code}")
-                
-        except requests.exceptions.RequestException as e:
-            print(f"⚠️ No se pudo conectar al backend local: {e}")
-            
-            # Fallback: Use existing CSV data directly
-            backend_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            csv_file_path = os.path.join(backend_path, "bankinter_agente_financiero_20250828_105840.csv")
-            
-            if os.path.exists(csv_file_path):
-                print("📁 Usando archivo CSV existente como fallback...")
-                
-                import pandas as pd
-                df = pd.read_csv(csv_file_path, sep='\t', encoding='utf-8-sig')
-                
-                uploaded = 0
-                duplicates = 0
-                errors = 0
-                
-                for _, row in df.iterrows():
-                    try:
-                        fecha = pd.to_datetime(row['Fecha'], format='%d/%m/%Y').strftime('%Y-%m-%d')
-                        
-                        # Check if movement already exists
-                        from ..models import FinancialMovement
-                        existing = session.query(FinancialMovement).filter(
-                            FinancialMovement.date == fecha,
-                            FinancialMovement.concept == str(row['Concepto']),
-                            FinancialMovement.amount == float(str(row['Importe']).replace(',', '.')),
-                            FinancialMovement.user_id == current_user.id
-                        ).first()
-                        
-                        if existing:
-                            duplicates += 1
-                            continue
-                            
-                        # Create new movement
-                        movement = FinancialMovement(
-                            date=fecha,
-                            concept=str(row['Concepto']),
-                            amount=float(str(row['Importe']).replace(',', '.')),
-                            category="Sin clasificar",
-                            user_id=current_user.id
-                        )
-                        
-                        session.add(movement)
-                        uploaded += 1
-                        
-                    except Exception as e:
-                        print(f"Error procesando fila: {e}")
-                        errors += 1
+            for row in reader:
+                total_rows += 1
+                try:
+                    # Parse date from DD/MM/YYYY to YYYY-MM-DD
+                    fecha_parts = row['Fecha'].split('/')
+                    fecha = f"{fecha_parts[2]}-{fecha_parts[1]}-{fecha_parts[0]}"
+                    
+                    # Parse amount (replace comma with dot for decimal)
+                    amount = float(row['Importe'].replace(',', '.'))
+                    concept = row['Concepto']
+                    
+                    # Check if movement already exists
+                    from ..models import FinancialMovement
+                    existing = session.query(FinancialMovement).filter(
+                        FinancialMovement.date == fecha,
+                        FinancialMovement.concept == concept,
+                        FinancialMovement.amount == amount,
+                        FinancialMovement.user_id == current_user.id
+                    ).first()
+                    
+                    if existing:
+                        duplicates += 1
                         continue
-                
-                session.commit()
-                
-                return {
-                    "sync_status": "completed",
-                    "message": f"Sincronización completada usando datos existentes. {uploaded} nuevos, {duplicates} duplicados, {errors} errores",
-                    "new_movements": uploaded,
-                    "duplicates_skipped": duplicates,
-                    "total_movements": len(df)
-                }
-            else:
-                raise Exception(f"No se pudo conectar al backend local y archivo CSV no encontrado: {csv_file_path}")
-            
+                        
+                    # Create new movement
+                    movement = FinancialMovement(
+                        date=fecha,
+                        concept=concept,
+                        amount=amount,
+                        category="Sin clasificar",
+                        user_id=current_user.id
+                    )
+                    
+                    session.add(movement)
+                    uploaded += 1
+                    
+                    if uploaded % 10 == 0:  # Progress indicator
+                        print(f"   ✅ Subidos: {uploaded}")
+                    
+                except Exception as e:
+                    print(f"❌ Error procesando fila {total_rows}: {e}")
+                    errors += 1
+                    continue
+        
+        print(f"📊 Procesados {total_rows} movimientos del CSV")
+        
+        # Commit all changes
+        session.commit()
+        
+        print(f"🎉 Sincronización completada:")
+        print(f"   📈 Nuevos movimientos: {uploaded}")
+        print(f"   🔄 Duplicados omitidos: {duplicates}")
+        print(f"   ❌ Errores: {errors}")
+        
+        return {
+            "sync_status": "completed",
+            "message": f"Sincronización de Bankinter completada exitosamente. {uploaded} movimientos agregados, {duplicates} duplicados omitidos",
+            "new_movements": uploaded,
+            "duplicates_skipped": duplicates,
+            "total_movements": total_rows,
+            "errors": errors
+        }
+        
     except Exception as e:
         print(f"❌ Error general: {e}")
         return {

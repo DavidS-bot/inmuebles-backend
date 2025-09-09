@@ -1072,118 +1072,71 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Sincronización directa con Bankinter usando datos CSV existentes"""
+    """Sincronización REAL con Bankinter - Abre navegador y descarga datos actuales"""
     
+    import subprocess
+    import sys
     import os
-    import csv
+    import glob
     from datetime import datetime
-    from sqlmodel import select
-    from ..models import FinancialMovement
     
     try:
-        print("🏦 EJECUTANDO BANKINTER SYNC DIRECTO...")
+        print("🏦 EJECUTANDO BANKINTER SCRAPING REAL...")
+        print("🌐 Se abrirá navegador para conectar con Bankinter...")
         
-        # Find the CSV file - prioritize app directory for production
-        csv_file_paths = [
-            os.path.join(os.path.dirname(__file__), '..', "bankinter_agente_financiero_20250828_105840.csv"),
-            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "bankinter_agente_financiero_20250828_105840.csv"),
-            "bankinter_agente_financiero_20250828_105840.csv"
-        ]
+        # Execute the real Bankinter scraper
+        script_path = os.path.join(os.path.dirname(__file__), '..', '..', 'bankinter_real_scraper_fixed.py')
         
-        csv_file = None
-        for path in csv_file_paths:
-            if os.path.exists(path):
-                csv_file = path
-                break
+        # If script doesn't exist in expected location, try current directory
+        if not os.path.exists(script_path):
+            script_path = os.path.join(os.path.dirname(__file__), '..', 'bankinter_real_scraper_fixed.py')
+        if not os.path.exists(script_path):
+            script_path = 'bankinter_real_scraper_fixed.py'
         
-        if not csv_file:
+        print(f"📄 Ejecutando script: {script_path}")
+        
+        # Run the scraper with extended timeout for browser automation
+        result = subprocess.run(
+            [sys.executable, script_path], 
+            capture_output=True, 
+            text=True, 
+            timeout=300,  # 5 minute timeout for browser automation
+            cwd=os.path.dirname(os.path.dirname(__file__)) or '.'
+        )
+        
+        print(f"📋 Resultado del scraper: código {result.returncode}")
+        print(f"📊 Salida del scraper: {result.stdout[:1000]}")
+        
+        if result.stderr:
+            print(f"⚠️ Errores del scraper: {result.stderr[:500]}")
+        
+        # Check if scraper succeeded
+        if result.returncode == 0:
             return {
-                "sync_status": "error",
-                "message": f"Archivo CSV de Bankinter no encontrado. Ubicaciones verificadas: {csv_file_paths}"
+                "sync_status": "completed",
+                "message": "Scraping de Bankinter completado exitosamente",
+                "details": "Navegador abierto, datos descargados y procesados",
+                "output": result.stdout[:500]
+            }
+        else:
+            return {
+                "sync_status": "error", 
+                "message": f"Error en scraping de Bankinter: {result.stderr[:200]}",
+                "return_code": result.returncode,
+                "details": result.stdout[:500]
             }
             
-        print(f"📁 Archivo CSV encontrado: {csv_file}")
-        
-        # Read CSV data
-        movements_data = []
-        with open(csv_file, 'r', encoding='utf-8-sig') as file:
-            reader = csv.DictReader(file, delimiter='\t')
-            for row in reader:
-                movements_data.append(row)
-        
-        print(f"📊 Leídos {len(movements_data)} movimientos de Bankinter")
-        
-        # Show sample data
-        if movements_data:
-            print("📋 Muestra de datos:")
-            for i, movement in enumerate(movements_data[:3]):
-                print(f"   {i+1}. {movement['Fecha']} | {movement['Concepto'][:40]} | {movement['Importe']}€")
-        
-        # Process each movement and add to database directly
-        uploaded = 0
-        duplicates = 0
-        errors = 0
-        
-        for movement_data in movements_data:
-            try:
-                # Parse date
-                fecha_str = movement_data['Fecha']
-                fecha = datetime.strptime(fecha_str, '%d/%m/%Y').date()
-                
-                # Parse amount
-                importe_str = movement_data['Importe'].replace(',', '.')
-                importe = float(importe_str)
-                
-                # Check if movement already exists
-                existing = session.exec(
-                    select(FinancialMovement).where(
-                        FinancialMovement.date == fecha,
-                        FinancialMovement.concept == movement_data['Concepto'],
-                        FinancialMovement.amount == importe
-                    )
-                ).first()
-                
-                if existing:
-                    duplicates += 1
-                    continue
-                
-                # Create new movement
-                new_movement = FinancialMovement(
-                    date=fecha,
-                    concept=movement_data['Concepto'],
-                    amount=importe,
-                    category="Sin clasificar",
-                    user_id=current_user.id,
-                    property_id=None  # Will be classified later
-                )
-                
-                session.add(new_movement)
-                uploaded += 1
-                
-            except Exception as e:
-                print(f"❌ Error procesando movimiento {movement_data}: {e}")
-                errors += 1
-        
-        # Commit all changes
-        session.commit()
-        
-        print(f"✅ COMPLETADO: {uploaded} nuevos, {duplicates} duplicados, {errors} errores")
-        
+    except subprocess.TimeoutExpired:
         return {
-            "sync_status": "completed",
-            "message": f"Sincronización completada exitosamente",
-            "new_movements": uploaded,
-            "duplicates_skipped": duplicates,
-            "errors": errors,
-            "total_processed": len(movements_data)
+            "sync_status": "timeout",
+            "message": "El scraping tardó más de 5 minutos. Proceso cancelado.",
+            "details": "El navegador puede seguir abierto, ciérralo manualmente si es necesario."
         }
-        
     except Exception as e:
-        print(f"❌ Error en sincronización: {e}")
-        session.rollback()
+        print(f"❌ Error ejecutando scraper: {e}")
         return {
             "sync_status": "error",
-            "message": f"Error durante la sincronización: {str(e)}"
+            "message": f"Error ejecutando scraper de Bankinter: {str(e)}"
         }
 
 @router.get("/bankinter/sync-progress/{user_id}")

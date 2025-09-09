@@ -133,13 +133,15 @@ def scrape_bankinter_real():
         # Enter credentials
         logger.info("[BANKINTER] 🔐 Introduciendo credenciales...")
         
-        # Username
+        # Username - Updated selectors based on actual Bankinter login page
         user_selectors = [
+            "input[placeholder='USUARIO']",
+            "input[type='text']",
+            "input:first-of-type",
+            ".form-control:first-of-type",
+            "[placeholder*='USUARIO']",
             "input[name='documento']",
-            "input[id*='usuario']",
-            "input[placeholder*='documento']",
-            "#documento",
-            "[data-testid='username']"
+            "#documento"
         ]
         
         user_field = None
@@ -157,13 +159,15 @@ def scrape_bankinter_real():
         user_field.send_keys(username)
         time.sleep(1)
         
-        # Password
+        # Password - Updated selectors based on actual Bankinter login page
         pass_selectors = [
-            "input[name='clave']",
+            "input[placeholder='Contraseña']",
             "input[type='password']",
-            "input[id*='password']",
-            "#clave",
-            "[data-testid='password']"
+            "input:nth-of-type(2)",
+            ".form-control:nth-of-type(2)",
+            "[placeholder*='Contraseña']",
+            "input[name='clave']",
+            "#clave"
         ]
         
         pass_field = None
@@ -181,14 +185,17 @@ def scrape_bankinter_real():
         pass_field.send_keys(password)
         time.sleep(1)
         
-        # Submit login
+        # Submit login - Updated selectors based on actual Bankinter login page
         logger.info("[BANKINTER] 🚀 Haciendo login...")
         submit_selectors = [
-            "input[type='submit']",
+            "//button[contains(text(), 'INICIAR SESIÓN')]",
+            "//button[contains(text(), 'INICIAR')]",
+            "//input[contains(@value, 'INICIAR')]",
             "button[type='submit']",
-            "input[value*='Entrar']",
-            "button[contains(text(), 'Entrar')]",
-            ".submit-button"
+            ".btn-primary",
+            ".login-button",
+            "input[type='submit']",
+            "//button[contains(text(), 'Entrar')]"
         ]
         
         login_submit = None

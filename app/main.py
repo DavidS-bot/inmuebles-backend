@@ -53,7 +53,7 @@ def on_startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "0.1.1", "viability_module": "enabled"}
 
 @app.get("/debug/routes")
 def debug_routes():

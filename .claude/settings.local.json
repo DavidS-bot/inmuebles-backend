@@ -86,7 +86,8 @@
       "WebFetch(domain:localhost)",
       "Read(/C:\\Users\\davsa\\inmuebles/**)",
       "Read(//c/Users/davsa/inmuebles/**)",
-      "Read(/C:\\Users\\davsa\\inmuebles/**)"
+      "Read(/C:\\Users\\davsa\\inmuebles/**)",
+      "Read(//c/Users/davsa/**)"
     ],
     "deny": [],
     "ask": []

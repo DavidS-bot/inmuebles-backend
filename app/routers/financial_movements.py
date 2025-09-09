@@ -343,6 +343,67 @@ def export_movements_to_excel(
         print(f"ERROR in export_movements_to_excel: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error exporting movements to Excel: {str(e)}")
 
+@router.post("/", response_model=FinancialMovementResponse)
+def create_financial_movement(
+    movement_data: FinancialMovementCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new financial movement"""
+    # Verify property ownership
+    property_obj = session.get(Property, movement_data.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    movement = FinancialMovement(**movement_data.dict())
+    session.add(movement)
+    session.commit()
+    session.refresh(movement)
+    return movement
+
+@router.get("/{movement_id}", response_model=FinancialMovementResponse)
+def get_financial_movement(
+    movement_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Get a specific financial movement"""
+    movement = session.get(FinancialMovement, movement_id)
+    if not movement:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Verify ownership through property
+    property_obj = session.get(Property, movement.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    return movement
+
+@router.put("/{movement_id}", response_model=FinancialMovementResponse)
+def update_financial_movement(
+    movement_id: int,
+    movement_data: FinancialMovementUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """Update a financial movement"""
+    movement = session.get(FinancialMovement, movement_id)
+    if not movement:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Verify ownership
+    property_obj = session.get(Property, movement.property_id)
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Movement not found")
+    
+    # Update fields
+    for field, value in movement_data.dict(exclude_unset=True).items():
+        setattr(movement, field, value)
+    
+    session.commit()
+    session.refresh(movement)
+    return movement
+
 @router.delete("/delete-by-date-range")
 def delete_movements_by_date_range(
     start_date: str,
@@ -419,68 +480,6 @@ def delete_movements_by_date_range(
     except Exception as e:
         print(f"ERROR in delete_movements_by_date_range: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error deleting movements: {str(e)}")
-
-@router.post("/", response_model=FinancialMovementResponse)
-def create_financial_movement(
-    movement_data: FinancialMovementCreate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Create a new financial movement"""
-    # Verify property ownership
-    property_obj = session.get(Property, movement_data.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Property not found")
-    
-    movement = FinancialMovement(**movement_data.dict())
-    session.add(movement)
-    session.commit()
-    session.refresh(movement)
-    return movement
-
-@router.get("/{movement_id}", response_model=FinancialMovementResponse)
-def get_financial_movement(
-    movement_id: int,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Get a specific financial movement"""
-    movement = session.get(FinancialMovement, movement_id)
-    if not movement:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Verify ownership through property
-    property_obj = session.get(Property, movement.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    return movement
-
-@router.put("/{movement_id}", response_model=FinancialMovementResponse)
-def update_financial_movement(
-    movement_id: int,
-    movement_data: FinancialMovementUpdate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-):
-    """Update a financial movement"""
-    movement = session.get(FinancialMovement, movement_id)
-    if not movement:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Verify ownership
-    property_obj = session.get(Property, movement.property_id)
-    if not property_obj or property_obj.owner_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Movement not found")
-    
-    # Update fields
-    for field, value in movement_data.dict(exclude_unset=True).items():
-        setattr(movement, field, value)
-    
-    session.commit()
-    session.refresh(movement)
-    return movement
-
 
 @router.delete("/{movement_id}")
 def delete_financial_movement(

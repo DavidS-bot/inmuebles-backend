@@ -1,86 +1,75 @@
 #!/usr/bin/env python3
 """
-Test Bankinter functionality in production backend
+Test the production Bankinter endpoint
 """
-
 import requests
-import time
 
-def test_production_bankinter():
-    """Test Bankinter endpoints in production"""
+def test_production_endpoint():
+    """Test the fixed Bankinter endpoint in production"""
     
-    # Production backend URL
     backend_url = "https://inmuebles-backend-api.onrender.com"
     
-    print("Testing production Bankinter endpoints...")
+    print("Testing production Bankinter sync endpoint...")
     
-    # First check if backend is alive
-    print("1. Checking backend health...")
     try:
-        response = requests.get(f'{backend_url}/health', timeout=10)
-        if response.status_code == 200:
-            print(f"Backend healthy: {response.json()}")
-        else:
-            print(f"Backend health check failed: {response.status_code}")
-            return
-    except Exception as e:
-        print(f"Backend not reachable: {e}")
-        return
-    
-    # Try to login
-    print("2. Attempting login...")
-    login_data = {'username': 'davsanchez21277@gmail.com', 'password': '123456'}
-    try:
-        response = requests.post(
+        # Login first
+        login_data = {
+            'username': 'davsanchez21277@gmail.com',
+            'password': '123456'
+        }
+        
+        print("1. Logging in...")
+        login_response = requests.post(
             f'{backend_url}/auth/login',
             data=login_data,
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             timeout=30
         )
         
-        if response.status_code != 200:
-            print(f"Login failed: {response.status_code} - {response.text}")
-            return
+        if login_response.status_code != 200:
+            print(f"Login failed: {login_response.status_code}")
+            print(f"Response: {login_response.text}")
+            return False
         
-        token = response.json()['access_token']
+        token = login_response.json()['access_token']
         headers = {'Authorization': f'Bearer {token}'}
-        print("Login successful")
         
-    except Exception as e:
-        print(f"Login error: {e}")
-        return
-    
-    # Test different Bankinter endpoints that might exist
-    endpoints_to_test = [
-        '/bankinter/update-movements',
-        '/bankinter-real/update-movements-real',
-        '/bankinter-v2/update-movements-v2',
-        '/bank-integration/sync-now'
-    ]
-    
-    for endpoint in endpoints_to_test:
-        print(f"3. Testing endpoint: {endpoint}")
-        try:
-            response = requests.post(
-                f'{backend_url}{endpoint}',
-                headers=headers,
-                json={},
-                timeout=10  # Short timeout for testing
-            )
+        print("2. Login successful! Testing Bankinter sync...")
+        
+        # Test Bankinter sync
+        sync_response = requests.post(
+            f'{backend_url}/integrations/bankinter/sync-now',
+            headers=headers,
+            json={},
+            timeout=180  # 3 minute timeout
+        )
+        
+        print(f"3. Sync response status: {sync_response.status_code}")
+        
+        if sync_response.status_code == 200:
+            result = sync_response.json()
+            print("4. SUCCESS! Bankinter sync result:")
+            print(f"   Status: {result.get('sync_status')}")
+            print(f"   Message: {result.get('message')}")
             
-            if response.status_code == 200:
-                print(f"SUCCESS: {endpoint} works!")
-                print(f"Response: {response.json()}")
-            elif response.status_code == 404:
-                print(f"NOT FOUND: {endpoint} doesn't exist")
-            else:
-                print(f"ERROR: {endpoint} returned {response.status_code}")
-                print(f"Response: {response.text[:200]}")
-                
-        except requests.exceptions.Timeout:
-            print(f"TIMEOUT: {endpoint} timed out (maybe it's working but slow)")
-        except Exception as e:
-            print(f"EXCEPTION: {endpoint} error: {e}")
+            if 'new_movements' in result:
+                print(f"   New movements: {result.get('new_movements')}")
+                print(f"   Total rows: {result.get('total_rows')}")
+                print(f"   Duplicates skipped: {result.get('duplicates_skipped')}")
+            
+            return True
+        else:
+            print(f"4. Sync failed: {sync_response.status_code}")
+            print(f"   Response: {sync_response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
 
 if __name__ == "__main__":
-    test_production_bankinter()
+    success = test_production_endpoint()
+    if success:
+        print("\nSUCCESS: PRODUCTION BANKINTER ENDPOINT IS WORKING!")
+    else:
+        print("\nFAILED: Production endpoint failed")

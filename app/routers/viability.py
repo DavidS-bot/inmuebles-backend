@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from sqlmodel import Session, select
 from datetime import datetime
+from pydantic import BaseModel
 
 from ..models import ViabilityStudy, ViabilityProjection, User
 from ..deps import get_session, get_current_user
@@ -14,17 +15,51 @@ from ..services.viability_calculator import (
 
 router = APIRouter(prefix="/viability", tags=["Estudios de Viabilidad"])
 
+class ViabilityStudyCreate(BaseModel):
+    study_name: str
+    
+    # DATOS DE COMPRA
+    purchase_price: float
+    property_valuation: Optional[float] = None
+    purchase_taxes_percentage: float = 0.11
+    renovation_costs: Optional[float] = 0
+    real_estate_commission: Optional[float] = 0
+    
+    # FINANCIACIÓN
+    loan_amount: float
+    interest_rate: float
+    loan_term_years: int = 25
+    
+    # INGRESOS
+    monthly_rent: float
+    annual_rent_increase: float = 0.02
+    
+    # GASTOS FIJOS ANUALES
+    community_fees: Optional[float] = 0
+    property_tax_ibi: float
+    life_insurance: Optional[float] = 0
+    home_insurance: float
+    maintenance_percentage: float = 0.01
+    property_management_fee: Optional[float] = 0
+    
+    # RIESGO
+    vacancy_risk_percentage: float = 0.05
+    stress_test_rent_decrease: float = 0.10
+
 @router.post("/", response_model=ViabilityStudy)
 async def create_viability_study(
-    study_data: dict,
+    study_data: ViabilityStudyCreate,
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
     """Crear nuevo estudio de viabilidad con cálculos automáticos"""
     try:
-        # Crear estudio con datos del usuario
-        study_data['user_id'] = current_user.id
-        study = ViabilityStudy(**study_data)
+        # Crear diccionario de datos desde el modelo Pydantic
+        data_dict = study_data.dict()
+        data_dict['user_id'] = current_user.id
+        
+        # Crear instancia del modelo SQLModel
+        study = ViabilityStudy(**data_dict)
         
         # Calcular todas las métricas automáticamente
         study = calculate_viability_metrics(study)
@@ -35,9 +70,9 @@ async def create_viability_study(
         db.refresh(study)
         
         # Generar y guardar proyección temporal (10 años por defecto)
-        projections = generate_temporal_projection(study, years=10)
-        for projection in projections:
-            projection.viability_study_id = study.id
+        projection_data = generate_temporal_projection(study, years=10)
+        for proj_dict in projection_data:
+            projection = ViabilityProjection(**proj_dict)
             db.add(projection)
         
         db.commit()

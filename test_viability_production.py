@@ -87,15 +87,15 @@ def test_viability_creation():
         
         if response.status_code == 200:
             result = response.json()
-            print("✅ Study created successfully!")
+            print("Study created successfully!")
             print(f"Study ID: {result.get('id')}")
             print(f"Study Name: {result.get('study_name')}")
             print(f"Net Annual Return: {result.get('net_annual_return', 0):.2%}")
-            print(f"Monthly Cashflow: €{result.get('monthly_net_cashflow', 0):.2f}")
+            print(f"Monthly Cashflow: EUR{result.get('monthly_net_cashflow', 0):.2f}")
             print(f"Risk Level: {result.get('risk_level')}")
             return True
         else:
-            print(f"❌ Study creation failed: {response.status_code}")
+            print(f"Study creation failed: {response.status_code}")
             try:
                 error_data = response.json()
                 print(f"Error details: {json.dumps(error_data, indent=2)}")

@@ -1,8 +1,9 @@
 # app/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from .db import init_db
+from .deps import get_current_user
 from .routers import (
     properties, rules, movements, cashflow, auth,
     financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local, viability
@@ -54,6 +55,10 @@ def on_startup():
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "0.1.2", "viability_module": "enabled", "timestamp": "2025-01-09"}
+
+@app.get("/test-auth")
+def test_auth(current_user = Depends(get_current_user)):
+    return {"auth": "ok", "user_id": current_user.id, "user_email": current_user.email}
 
 @app.get("/debug/routes")
 def debug_routes():

@@ -1072,21 +1072,20 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Forzar sincronización con Bankinter usando lógica directa del script que funcionaba"""
+    """Forzar sincronización con Bankinter usando datos CSV directamente"""
     
     import os
-    import pandas as pd
+    import csv
     from datetime import datetime
     
     try:
         print("🏦 EJECUTANDO BANKINTER SYNC DIRECTO...")
         
-        # Find the CSV file path - try multiple locations
-        backend_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        # Find the CSV file - prioritize app directory for production
         csv_file_paths = [
-            os.path.join(backend_path, "bankinter_agente_financiero_20250828_105840.csv"),
             os.path.join(os.path.dirname(__file__), '..', "bankinter_agente_financiero_20250828_105840.csv"),
-            "bankinter_agente_financiero_20250828_105840.csv"  # current directory
+            os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "bankinter_agente_financiero_20250828_105840.csv"),
+            "bankinter_agente_financiero_20250828_105840.csv"
         ]
         
         csv_file = None
@@ -1098,87 +1097,96 @@ async def sync_bankinter_now(
         if not csv_file:
             return {
                 "sync_status": "error",
-                "message": f"Archivo CSV de Bankinter no encontrado en ubicaciones: {csv_file_paths}"
+                "message": f"Archivo CSV de Bankinter no encontrado. Ubicaciones verificadas: {csv_file_paths}"
             }
             
-        print(f"📁 Usando archivo CSV: {csv_file}")
+        print(f"📁 Archivo CSV encontrado: {csv_file}")
         
-        # Read and process CSV data exactly like the working script
-        df = pd.read_csv(csv_file, sep='\t', encoding='utf-8-sig')
+        # Read CSV data
+        movements_data = []
+        with open(csv_file, 'r', encoding='utf-8-sig') as file:
+            reader = csv.DictReader(file, delimiter='\t')
+            for row in reader:
+                movements_data.append(row)
         
-        print(f"📊 Procesando {len(df)} movimientos de Bankinter...")
-        print(f"📅 Rango de fechas: {df['Fecha'].min()} - {df['Fecha'].max()}")
+        print(f"📊 Leídos {len(movements_data)} movimientos de Bankinter")
         
         # Show sample data
-        for i in range(min(3, len(df))):
-            row = df.iloc[i]
-            print(f"   {i+1}. {row['Fecha']} | {row['Concepto'][:40]} | {row['Importe']}€")
+        if movements_data:
+            print("📋 Muestra de datos:")
+            for i, movement in enumerate(movements_data[:3]):
+                print(f"   {i+1}. {movement['Fecha']} | {movement['Concepto'][:40]} | {movement['Importe']}€")
         
-        # Process data for upload - convert to format expected by upload endpoint
-        df_clean = df.copy()
-        df_clean['Importe'] = df_clean['Importe'].astype(str).str.replace(',', '.').astype(float)
-        df_clean['Fecha'] = pd.to_datetime(df_clean['Fecha'], format='%d/%m/%Y')
-        df_clean = df_clean.sort_values('Fecha', ascending=False)
-        df_clean['Fecha'] = df_clean['Fecha'].dt.strftime('%d/%m/%Y')  # Keep original format for Excel
+        # Process each movement and add to database directly
+        uploaded = 0
+        duplicates = 0
+        errors = 0
         
-        # Create temporary Excel file for upload
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
-            excel_path = tmp_file.name
-            df_clean.to_excel(excel_path, index=False)
-            
-        print(f"💾 Excel temporal creado: {excel_path}")
+        from ..models import FinancialMovement
         
-        # Upload using internal endpoint - import the upload function directly
-        from ..routers.financial_movements import upload_excel_global
-        from fastapi import UploadFile
-        
-        try:
-            # Create UploadFile from our Excel data
-            with open(excel_path, 'rb') as f:
-                file_content = f.read()
-                
-            temp_upload_file = UploadFile(
-                filename="bankinter_agente_financiero_sync.xlsx",
-                file=tempfile.NamedTemporaryFile(delete=False)
-            )
-            temp_upload_file.file.write(file_content)
-            temp_upload_file.file.seek(0)
-            
-            print("📤 Subiendo datos al sistema...")
-            
-            # Call the upload endpoint directly
-            result = await upload_excel_global(temp_upload_file, session, current_user)
-            
-            # Clean up temporary files
-            temp_upload_file.file.close()
-            os.unlink(temp_upload_file.file.name)
-            os.unlink(excel_path)
-            
-            print("🎉 Sincronización completada exitosamente")
-            print(f"   📈 Movimientos nuevos: {result.get('created_movements', 0)}")
-            print(f"   🔄 Duplicados omitidos: {result.get('duplicates_skipped', 0)}")
-            
-            return {
-                "sync_status": "completed",
-                "message": f"Sincronización de Bankinter completada exitosamente. {result.get('created_movements', 0)} movimientos agregados.",
-                "new_movements": result.get('created_movements', 0),
-                "duplicates_skipped": result.get('duplicates_skipped', 0),
-                "total_movements": len(df),
-                "details": f"Procesados {len(df)} movimientos desde CSV"
-            }
-            
-        except Exception as upload_error:
-            print(f"❌ Error en subida: {upload_error}")
-            # Clean up on error
+        for movement in movements_data:
             try:
-                os.unlink(excel_path)
-            except:
-                pass
-            raise upload_error
-            
+                # Parse date from DD/MM/YYYY to YYYY-MM-DD
+                fecha_parts = movement['Fecha'].split('/')
+                fecha = f"{fecha_parts[2]}-{fecha_parts[1]}-{fecha_parts[0]}"
+                
+                # Parse amount (replace comma with dot for decimal)
+                amount = float(movement['Importe'].replace(',', '.'))
+                concept = movement['Concepto']
+                
+                # Check if movement already exists for this user
+                existing = session.query(FinancialMovement).filter(
+                    FinancialMovement.date == fecha,
+                    FinancialMovement.concept == concept,
+                    FinancialMovement.amount == amount,
+                    FinancialMovement.user_id == current_user.id
+                ).first()
+                
+                if existing:
+                    duplicates += 1
+                    continue
+                    
+                # Create new movement
+                new_movement = FinancialMovement(
+                    date=fecha,
+                    concept=concept,
+                    amount=amount,
+                    category="Sin clasificar",
+                    user_id=current_user.id
+                )
+                
+                session.add(new_movement)
+                uploaded += 1
+                
+                if uploaded % 10 == 0:
+                    print(f"   ✅ Procesados: {uploaded}")
+                
+            except Exception as row_error:
+                print(f"❌ Error procesando movimiento: {row_error}")
+                errors += 1
+                continue
+        
+        # Commit all changes
+        session.commit()
+        
+        print("🎉 Sincronización completada:")
+        print(f"   📈 Movimientos nuevos: {uploaded}")
+        print(f"   🔄 Duplicados omitidos: {duplicates}")
+        print(f"   ❌ Errores: {errors}")
+        
+        return {
+            "sync_status": "completed",
+            "message": f"Sincronización de Bankinter completada exitosamente. {uploaded} movimientos agregados, {duplicates} duplicados omitidos.",
+            "new_movements": uploaded,
+            "duplicates_skipped": duplicates,
+            "total_movements": len(movements_data),
+            "errors": errors
+        }
+        
     except Exception as e:
         print(f"❌ Error general en Bankinter sync: {e}")
+        import traceback
+        traceback.print_exc()
         return {
             "sync_status": "error",
             "message": f"Error en sincronización de Bankinter: {str(e)}"

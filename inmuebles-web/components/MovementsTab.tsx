@@ -392,8 +392,12 @@ export default function MovementsTab() {
         end_date: dateRangeDelete.end_date
       });
       
-      if (dateRangeDelete.property_id) {
-        queryParams.append('property_id', dateRangeDelete.property_id);
+      if (dateRangeDelete.property_id && dateRangeDelete.property_id.trim() !== "") {
+        // Convert to integer to ensure backend validation passes
+        const propertyIdInt = parseInt(dateRangeDelete.property_id, 10);
+        if (!isNaN(propertyIdInt)) {
+          queryParams.append('property_id', propertyIdInt.toString());
+        }
       }
 
       const response = await api.delete(`/financial-movements/delete-by-date-range?${queryParams.toString()}`);

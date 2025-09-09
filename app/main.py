@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .db import init_db
 from .routers import (
     properties, rules, movements, cashflow, auth,
-    financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local
+    financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local, viability
 )
 
 app = FastAPI(title="Inmuebles API", version="0.1.0")
@@ -45,6 +45,7 @@ app.include_router(bankinter_real.router)
 app.include_router(bankinter_upload.router)
 app.include_router(bankinter_local.router)
 app.include_router(payment_rules.router)
+app.include_router(viability.router)
 
 @app.on_event("startup")
 def on_startup():

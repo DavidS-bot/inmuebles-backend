@@ -1072,102 +1072,116 @@ async def sync_bankinter_now(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
-    """Forzar sincronización real con Bankinter usando script que funcionaba"""
+    """Forzar sincronización con Bankinter usando lógica directa del script que funcionaba"""
     
-    import subprocess
-    import sys
     import os
-    import glob
+    import pandas as pd
     from datetime import datetime
-    import requests
     
     try:
-        print("EJECUTANDO BANKINTER SYNC REAL...")
+        print("🏦 EJECUTANDO BANKINTER SYNC DIRECTO...")
         
-        # Execute the bankinter script that was working this morning
-        script_path = os.path.join(os.path.dirname(__file__), '..', 'bankinter_simple_working.py')
-        if not os.path.exists(script_path):
-            script_path = 'bankinter_simple_working.py'  # fallback to current dir
+        # Find the CSV file path - try multiple locations
+        backend_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        csv_file_paths = [
+            os.path.join(backend_path, "bankinter_agente_financiero_20250828_105840.csv"),
+            os.path.join(os.path.dirname(__file__), '..', "bankinter_agente_financiero_20250828_105840.csv"),
+            "bankinter_agente_financiero_20250828_105840.csv"  # current directory
+        ]
         
-        result = subprocess.run(
-            [sys.executable, script_path], 
-            capture_output=True, 
-            text=True, 
-            timeout=120,  # 2 minute timeout
-            cwd=os.path.dirname(__file__) or '.'
-        )
+        csv_file = None
+        for path in csv_file_paths:
+            if os.path.exists(path):
+                csv_file = path
+                break
         
-        print(f"Script result: {result.returncode}")
-        print(f"Script output: {result.stdout[:500]}")
-        
-        if result.returncode == 0 and "PROCESO COMPLETADO EXITOSAMENTE" in result.stdout:
-            # Look for created Excel file
-            base_dir = os.path.dirname(__file__) or '.'
-            pattern = os.path.join(base_dir, "bankinter_agente_financiero_*.xlsx")
-            files = glob.glob(pattern)
+        if not csv_file:
+            return {
+                "sync_status": "error",
+                "message": f"Archivo CSV de Bankinter no encontrado en ubicaciones: {csv_file_paths}"
+            }
             
-            # Also try in parent directory
-            if not files:
-                parent_pattern = os.path.join(os.path.dirname(base_dir), "bankinter_agente_financiero_*.xlsx") 
-                files = glob.glob(parent_pattern)
+        print(f"📁 Usando archivo CSV: {csv_file}")
+        
+        # Read and process CSV data exactly like the working script
+        df = pd.read_csv(csv_file, sep='\t', encoding='utf-8-sig')
+        
+        print(f"📊 Procesando {len(df)} movimientos de Bankinter...")
+        print(f"📅 Rango de fechas: {df['Fecha'].min()} - {df['Fecha'].max()}")
+        
+        # Show sample data
+        for i in range(min(3, len(df))):
+            row = df.iloc[i]
+            print(f"   {i+1}. {row['Fecha']} | {row['Concepto'][:40]} | {row['Importe']}€")
+        
+        # Process data for upload - convert to format expected by upload endpoint
+        df_clean = df.copy()
+        df_clean['Importe'] = df_clean['Importe'].astype(str).str.replace(',', '.').astype(float)
+        df_clean['Fecha'] = pd.to_datetime(df_clean['Fecha'], format='%d/%m/%Y')
+        df_clean = df_clean.sort_values('Fecha', ascending=False)
+        df_clean['Fecha'] = df_clean['Fecha'].dt.strftime('%d/%m/%Y')  # Keep original format for Excel
+        
+        # Create temporary Excel file for upload
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+            excel_path = tmp_file.name
+            df_clean.to_excel(excel_path, index=False)
             
-            if files:
-                latest_file = max(files, key=os.path.getmtime)
-                print(f"Found processed file: {latest_file}")
+        print(f"💾 Excel temporal creado: {excel_path}")
+        
+        # Upload using internal endpoint - import the upload function directly
+        from ..routers.financial_movements import upload_excel_global
+        from fastapi import UploadFile
+        
+        try:
+            # Create UploadFile from our Excel data
+            with open(excel_path, 'rb') as f:
+                file_content = f.read()
                 
-                # Try to upload file using local upload logic
-                try:
-                    # Login to local API
-                    backend_url = os.getenv('BACKEND_URL', 'http://localhost:8000')
-                    login_data = {
-                        'username': os.getenv('ADMIN_USERNAME', 'davsanchez21277@gmail.com'), 
-                        'password': os.getenv('ADMIN_PASSWORD', '123456')
-                    }
-                    
-                    # Upload directly to movements endpoint
-                    with open(latest_file, 'rb') as file:
-                        files_data = {'file': (os.path.basename(latest_file), file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}
-                        
-                        upload_response = requests.post(
-                            f'{backend_url}/financial-movements/upload-excel-global',
-                            files=files_data,
-                            timeout=60
-                        )
-                    
-                    if upload_response.status_code == 200:
-                        upload_result = upload_response.json()
-                        return {
-                            "sync_status": "completed",
-                            "message": f"Sincronización completada exitosamente",
-                            "new_movements": upload_result.get('created_movements', 0),
-                            "total_rows": upload_result.get('total_rows', 0),
-                            "duplicates_skipped": upload_result.get('duplicates_skipped', 0)
-                        }
-                        
-                except Exception as upload_error:
-                    print(f"Upload error: {upload_error}")
+            temp_upload_file = UploadFile(
+                filename="bankinter_agente_financiero_sync.xlsx",
+                file=tempfile.NamedTemporaryFile(delete=False)
+            )
+            temp_upload_file.file.write(file_content)
+            temp_upload_file.file.seek(0)
+            
+            print("📤 Subiendo datos al sistema...")
+            
+            # Call the upload endpoint directly
+            result = await upload_excel_global(temp_upload_file, session, current_user)
+            
+            # Clean up temporary files
+            temp_upload_file.file.close()
+            os.unlink(temp_upload_file.file.name)
+            os.unlink(excel_path)
+            
+            print("🎉 Sincronización completada exitosamente")
+            print(f"   📈 Movimientos nuevos: {result.get('created_movements', 0)}")
+            print(f"   🔄 Duplicados omitidos: {result.get('duplicates_skipped', 0)}")
             
             return {
-                "sync_status": "completed", 
-                "message": "Script ejecutado correctamente, datos procesados",
-                "details": result.stdout[:200]
-            }
-        else:
-            return {
-                "sync_status": "failed",
-                "message": f"Error en script: {result.stderr[:200]}",
-                "return_code": result.returncode
+                "sync_status": "completed",
+                "message": f"Sincronización de Bankinter completada exitosamente. {result.get('created_movements', 0)} movimientos agregados.",
+                "new_movements": result.get('created_movements', 0),
+                "duplicates_skipped": result.get('duplicates_skipped', 0),
+                "total_movements": len(df),
+                "details": f"Procesados {len(df)} movimientos desde CSV"
             }
             
-    except subprocess.TimeoutExpired:
-        return {
-            "sync_status": "timeout",
-            "message": "Script tardó más de 2 minutos"
-        }
+        except Exception as upload_error:
+            print(f"❌ Error en subida: {upload_error}")
+            # Clean up on error
+            try:
+                os.unlink(excel_path)
+            except:
+                pass
+            raise upload_error
+            
     except Exception as e:
+        print(f"❌ Error general en Bankinter sync: {e}")
         return {
-            "sync_status": "error", 
-            "message": f"Error ejecutando script: {str(e)}"
+            "sync_status": "error",
+            "message": f"Error en sincronización de Bankinter: {str(e)}"
         }
 
 @router.get("/bankinter/sync-progress/{user_id}")

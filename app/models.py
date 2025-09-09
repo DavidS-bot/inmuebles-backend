@@ -1,6 +1,6 @@
 # app/models.py
 from typing import Optional, List, TYPE_CHECKING
-from datetime import date
+from datetime import date, datetime
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
@@ -14,6 +14,7 @@ class User(SQLModel, table=True):
 
     properties: List["Property"] = Relationship(back_populates="owner")
     payment_rules: List["PaymentRule"] = Relationship(back_populates="user")
+    viability_studies: List["ViabilityStudy"] = Relationship(back_populates="user")
 
 class Property(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -42,6 +43,7 @@ class Property(SQLModel, table=True):
     financial_movements: List["FinancialMovement"] = Relationship(back_populates="property")
     classification_rules: List["ClassificationRule"] = Relationship(back_populates="property")
     payment_rules: List["PaymentRule"] = Relationship(back_populates="property")
+    viability_studies: List["ViabilityStudy"] = Relationship(back_populates="property")
 
 class Rule(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -223,4 +225,92 @@ class PaymentRule(SQLModel, table=True):
     # Relationships
     user: Optional[User] = Relationship()
     property: Optional[Property] = Relationship()
+
+class ViabilityStudy(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    property_id: Optional[int] = Field(default=None, foreign_key="property.id")
+    study_name: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    
+    # DATOS DE COMPRA
+    purchase_price: float
+    property_valuation: Optional[float] = None
+    purchase_taxes_percentage: float = 0.11  # ITP + Notario + Registro
+    purchase_costs: float = 0  # Calculado automáticamente
+    total_purchase_price: float = 0  # Precio + Costes
+    renovation_costs: Optional[float] = 0
+    real_estate_commission: Optional[float] = 0
+    
+    # FINANCIACIÓN
+    loan_amount: float
+    down_payment: float = 0  # Equity/Depósito - calculado
+    interest_rate: float
+    loan_term_years: int = 25
+    monthly_mortgage_payment: float = 0  # Calculado
+    loan_to_value: float = 0  # LTV calculado
+    
+    # INGRESOS
+    monthly_rent: float
+    annual_rent_increase: float = 0.02  # 2% anual
+    
+    # GASTOS FIJOS ANUALES
+    community_fees: Optional[float] = 0
+    property_tax_ibi: float
+    life_insurance: Optional[float] = 0
+    home_insurance: float
+    maintenance_percentage: float = 0.01  # 1% valor propiedad
+    property_management_fee: Optional[float] = 0  # Si se gestiona por terceros
+    
+    # RESULTADOS CALCULADOS
+    monthly_net_cashflow: float = 0
+    annual_net_cashflow: float = 0
+    net_annual_return: float = 0  # Rentabilidad neta anual
+    total_annual_return: float = 0  # Rentabilidad + equity
+    monthly_equity_increase: float = 0  # Amortización del préstamo
+    annual_equity_increase: float = 0
+    
+    # ANÁLISIS DE RIESGO
+    break_even_rent: float = 0  # Renta mínima para cubrir gastos
+    vacancy_risk_percentage: float = 0.05  # 5% riesgo vacancia
+    stress_test_rent_decrease: float = 0.10  # Test con 10% menos renta
+    
+    # ESTADO DEL ESTUDIO
+    is_favorable: bool = Field(default=False)
+    risk_level: str = Field(default="MEDIUM")  # LOW, MEDIUM, HIGH
+    notes: Optional[str] = None
+    
+    # Relaciones
+    user: Optional[User] = Relationship()
+    property: Optional["Property"] = Relationship()
+    projections: List["ViabilityProjection"] = Relationship(back_populates="viability_study")
+
+class ViabilityProjection(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    viability_study_id: int = Field(foreign_key="viabilitystudy.id")
+    year: int
+    month: int
+    
+    # SALDOS
+    outstanding_loan_balance: float
+    accumulated_equity: float
+    property_value: float  # Con revalorización
+    
+    # FLUJOS DEL MES
+    monthly_rent: float
+    monthly_mortgage_payment: float
+    monthly_interest: float
+    monthly_principal: float
+    monthly_expenses: float
+    monthly_net_cashflow: float
+    accumulated_cashflow: float
+    
+    # MÉTRICAS
+    annual_return: float
+    total_return_with_equity: float
+    current_ltv: float
+    
+    # Relación
+    viability_study: Optional[ViabilityStudy] = Relationship(back_populates="projections")
 

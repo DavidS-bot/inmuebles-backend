@@ -12,7 +12,8 @@ import {
   Calculator,
   Bell,
   ArrowUpDown,
-  PieChart
+  PieChart,
+  Target
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { persistToken } from '@/lib/auth';
@@ -71,6 +72,13 @@ function getNavGroups(badgeData: Record<string, number>): NavGroup[] {
           badge: badgeData.analytics || 0
         },
         {
+          id: 'estudios-viabilidad',
+          label: 'Estudios de Viabilidad',
+          href: '/estudios-viabilidad',
+          icon: Target,
+          badge: badgeData.viabilityStudies || 0
+        },
+        {
           id: 'tax-assistant',
           label: 'Asistente Fiscal',
           href: '/financial-agent/tax-assistant',
@@ -118,6 +126,7 @@ export default function Sidebar() {
     financialAgent: 0,
     movements: 3, // Unclassified movements
     analytics: 1, // New insights available
+    viabilityStudies: 0, // Number of studies
     taxAssistant: 0,
     paymentSettings: 0,
     notifications: unreadCount, // Dynamic notification count
@@ -127,7 +136,9 @@ export default function Sidebar() {
   const navGroups = getNavGroups(badgeData);
 
   const getActiveTab = () => {
-    if (pathname.includes('/financial-agent')) {
+    if (pathname.includes('/estudios-viabilidad')) {
+      return 'estudios-viabilidad';
+    } else if (pathname.includes('/financial-agent')) {
       if (pathname.includes('/analytics')) return 'analytics';
       if (pathname.includes('/movements')) return 'movements';
       if (pathname.includes('/tax-assistant')) return 'tax-assistant';

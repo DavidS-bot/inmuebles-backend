@@ -88,7 +88,11 @@
       "Read(//c/Users/davsa/inmuebles/**)",
       "Read(/C:\\Users\\davsa\\inmuebles/**)",
       "Read(//c/Users/davsa/**)",
-      "Bash(git remote get-url:*)"
+      "Bash(git remote get-url:*)",
+      "Bash(gh repo create:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:inmuebles-83zvkj6sp-davsanchez21277-9843s-projects.vercel.app)",
+      "WebFetch(domain:inmuebles-jt0jzatxq-davsanchez21277-9843s-projects.vercel.app)"
     ],
     "deny": [],
     "ask": []

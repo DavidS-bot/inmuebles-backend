@@ -1446,6 +1446,7 @@ async def sync_bankinter_fixed(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
 ):
+
     """SCRAPING REAL - Endpoint que realmente funciona"""
     
     import subprocess

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { X, FileText, BarChart3, Target, Calculator } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface ViabilityStudy {
   id: number;

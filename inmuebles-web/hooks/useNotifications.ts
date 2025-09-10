@@ -9,7 +9,8 @@ interface NotificationHook {
   refreshCount: () => void;
 }
 
-export function useNotifications(apiUrl: string = 'http://localhost:8000'): NotificationHook {
+export function useNotifications(apiUrl?: string): NotificationHook {
+  const API_URL = apiUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +20,7 @@ export function useNotifications(apiUrl: string = 'http://localhost:8000'): Noti
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${apiUrl}/notifications/alerts`);
+      const response = await fetch(`${API_URL}/notifications/alerts`);
       
       if (response.ok) {
         const data = await response.json();

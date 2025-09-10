@@ -20,7 +20,8 @@ interface SmartNotificationSystemProps {
   apiUrl?: string;
 }
 
-export default function SmartNotificationSystem({ apiUrl = 'http://localhost:8000' }: SmartNotificationSystemProps) {
+export default function SmartNotificationSystem({ apiUrl }: SmartNotificationSystemProps) {
+  const API_URL = apiUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ export default function SmartNotificationSystem({ apiUrl = 'http://localhost:800
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/notifications/alerts`);
+      const response = await fetch(`${API_URL}/notifications/alerts`);
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications || []);
@@ -153,7 +154,7 @@ export default function SmartNotificationSystem({ apiUrl = 'http://localhost:800
   const handleNotificationAction = async (notificationId: string, action: string) => {
     // Track action analytics
     try {
-      await fetch(`${apiUrl}/notifications/${notificationId}/action`, {
+      await fetch(`${API_URL}/notifications/${notificationId}/action`, {
         method: 'POST'
       });
     } catch (error) {
@@ -176,7 +177,7 @@ export default function SmartNotificationSystem({ apiUrl = 'http://localhost:800
 
   const dismissNotification = async (notificationId: string) => {
     try {
-      await fetch(`${apiUrl}/notifications/${notificationId}/dismiss`, {
+      await fetch(`${API_URL}/notifications/${notificationId}/dismiss`, {
         method: 'POST'
       });
       
@@ -189,7 +190,7 @@ export default function SmartNotificationSystem({ apiUrl = 'http://localhost:800
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await fetch(`${apiUrl}/notifications/${notificationId}/read`, {
+      await fetch(`${API_URL}/notifications/${notificationId}/read`, {
         method: 'POST'
       });
     } catch (error) {

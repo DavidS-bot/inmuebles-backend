@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, TrendingUp, AlertTriangle, FileText, Plus, Search, Filter } from 'lucide-react';
 import ViabilityForm from './components/ViabilityForm';
-import ViabilityResults from './components/ViabilityResults';
-import EnhancedViabilityResults from './components/EnhancedViabilityResults';
 import SimpleViabilityResults from './components/SimpleViabilityResults';
 import ViabilityComparison from './components/ViabilityComparison';
 

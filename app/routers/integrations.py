@@ -1269,6 +1269,7 @@ print(f"RESULTADO: {result}")
                 "error": str(e)
             }
 
+
 @router.get("/bankinter/test-direct")
 async def test_bankinter_direct():
     """TEST SIN AUTH - Verificar que el scraping funciona"""

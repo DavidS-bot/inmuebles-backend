@@ -91,7 +91,7 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
     setApiError('');
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
       console.log('Token available:', !!token);
       console.log('Form data:', formData);

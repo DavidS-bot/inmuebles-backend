@@ -19,7 +19,7 @@ export default function ViabilityComparison({ studyIds, onClose }: ViabilityComp
   const fetchComparison = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/viability/compare`, {
         method: 'POST',
         headers: {

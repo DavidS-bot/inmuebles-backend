@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, TrendingUp, AlertTriangle, FileText, Plus, Search, Filter } from 'lucide-react';
 import ViabilityForm from './components/ViabilityForm';
 import ViabilityResults from './components/ViabilityResults';
+import EnhancedViabilityResults from './components/EnhancedViabilityResults';
+import SimpleViabilityResults from './components/SimpleViabilityResults';
 import ViabilityComparison from './components/ViabilityComparison';
 
 interface ViabilityStudy {
@@ -38,7 +40,7 @@ export default function EstudiosViabilidad() {
 
   const fetchViabilityStudies = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/viability/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -65,7 +67,7 @@ export default function EstudiosViabilidad() {
   const handleStudyDeleted = async (studyId: number) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este estudio?')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/viability/${studyId}`, {
           method: 'DELETE',
           headers: {
@@ -348,13 +350,9 @@ export default function EstudiosViabilidad() {
       )}
 
       {activeStudy && (
-        <ViabilityResults
+        <SimpleViabilityResults
           study={activeStudy}
           onClose={() => setActiveStudy(null)}
-          onStudyUpdated={(updatedStudy) => {
-            setStudies(studies.map(s => s.id === updatedStudy.id ? updatedStudy : s));
-            setActiveStudy(updatedStudy);
-          }}
         />
       )}
 

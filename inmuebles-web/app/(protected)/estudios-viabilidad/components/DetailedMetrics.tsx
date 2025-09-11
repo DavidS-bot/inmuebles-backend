@@ -319,6 +319,104 @@ export default function DetailedMetrics({ study }: DetailedMetricsProps) {
             </div>
           </div>
         </div>
+
+        {/* Metrics Definitions */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+            <Calculator className="h-5 w-5 mr-2 text-blue-600" />
+            Definiciones de Métricas
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Rentabilidad Metrics */}
+            <div>
+              <h5 className="font-medium text-gray-800 border-b border-gray-200 pb-2 mb-3">
+                Métricas de Rentabilidad
+              </h5>
+              <div className="space-y-3">
+                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                  <h6 className="font-medium text-blue-900 mb-1">ROI Anual Neto</h6>
+                  <p className="text-sm text-blue-800">
+                    Rentabilidad anual después de gastos e impuestos. Fórmula: (Ingresos anuales - Gastos) / Inversión inicial
+                  </p>
+                </div>
+                
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                  <h6 className="font-medium text-green-900 mb-1">ROI Total Bruto</h6>
+                  <p className="text-sm text-green-800">
+                    Rentabilidad bruta sin deducir gastos operativos. Fórmula: Ingresos anuales / Precio de compra
+                  </p>
+                </div>
+                
+                <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                  <h6 className="font-medium text-purple-900 mb-1">Cap Rate</h6>
+                  <p className="text-sm text-purple-800">
+                    Tasa de capitalización. Indica el retorno potencial sin financiación. Fórmula: NOI / Valor del inmueble
+                  </p>
+                </div>
+                
+                <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
+                  <h6 className="font-medium text-indigo-900 mb-1">Cash-on-Cash Return</h6>
+                  <p className="text-sm text-indigo-800">
+                    Rentabilidad sobre el efectivo invertido inicialmente. Fórmula: Cash flow anual / Down payment
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Risk and Leverage Metrics */}
+            <div>
+              <h5 className="font-medium text-gray-800 border-b border-gray-200 pb-2 mb-3">
+                Métricas de Riesgo y Apalancamiento
+              </h5>
+              <div className="space-y-3">
+                <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                  <h6 className="font-medium text-orange-900 mb-1">LTV Ratio</h6>
+                  <p className="text-sm text-orange-800">
+                    Loan-to-Value. Porcentaje financiado del inmueble. A mayor LTV, mayor apalancamiento y riesgo.
+                  </p>
+                </div>
+                
+                <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                  <h6 className="font-medium text-emerald-900 mb-1">DSCR</h6>
+                  <p className="text-sm text-emerald-800">
+                    Debt Service Coverage Ratio. Capacidad de pago de la hipoteca. {'>'}1.25 se considera seguro.
+                  </p>
+                </div>
+                
+                <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
+                  <h6 className="font-medium text-cyan-900 mb-1">Ratio Alquiler/Precio</h6>
+                  <p className="text-sm text-cyan-800">
+                    Indicador de valor. El 1% mensual es considerado excelente, 0.5% aceptable.
+                  </p>
+                </div>
+                
+                <div className="bg-rose-50 rounded-lg p-3 border border-rose-200">
+                  <h6 className="font-medium text-rose-900 mb-1">Break Even Rent</h6>
+                  <p className="text-sm text-rose-800">
+                    Alquiler mínimo necesario para cubrir todos los gastos. Buffer = (Alquiler actual - Break even) / Break even
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Additional Concepts */}
+          <div className="mt-6 bg-gray-50 rounded-lg p-4">
+            <h6 className="font-medium text-gray-900 mb-3">Conceptos Adicionales</h6>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+              <div>
+                <strong>NOI (Net Operating Income):</strong> Ingresos netos operativos después de gastos pero antes del servicio de la deuda.
+              </div>
+              <div>
+                <strong>Yield Bruto vs Neto:</strong> Bruto no incluye gastos; Neto sí los incluye y es más realista.
+              </div>
+              <div>
+                <strong>Payback Period:</strong> Tiempo necesario para recuperar la inversión inicial a través del cash flow.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

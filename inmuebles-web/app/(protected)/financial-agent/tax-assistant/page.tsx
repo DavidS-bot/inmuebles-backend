@@ -476,7 +476,7 @@ export default function TaxAssistantPage() {
                         optimization.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-green-100 text-green-800'
                       }`}>
-                        {optimization.priority.toUpperCase()}
+                        {optimization.priority?.toUpperCase() || 'NORMAL'}
                       </div>
                       <h4 className="text-lg font-semibold">{optimization.category}</h4>
                       <span className="text-sm text-gray-500">({(optimization.confidence * 100).toFixed(0)}% confianza)</span>

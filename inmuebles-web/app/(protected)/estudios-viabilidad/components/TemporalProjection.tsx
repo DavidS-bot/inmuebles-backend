@@ -323,7 +323,7 @@ export default function TemporalProjection({ studyId }: TemporalProjectionProps)
             </div>
             <div>
               • <strong>Mejor año de rentabilidad:</strong> Año {
-                projectionData.reduce((max, p) => p.annual_return > max.annual_return ? p : max).year
+                projectionData.reduce((max, p) => (p.annual_return || 0) > (max.annual_return || 0) ? p : max).year
               }
             </div>
             <div>

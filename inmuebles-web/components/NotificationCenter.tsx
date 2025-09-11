@@ -157,7 +157,8 @@ export default function NotificationCenter({ apiUrl = 'http://localhost:8000' }:
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority?: string) => {
+    if (!priority) return 'bg-gray-100 text-gray-800 border-gray-200';
     switch (priority) {
       case 'critical':
         return 'bg-red-100 text-red-800 border-red-200';
@@ -393,7 +394,7 @@ export default function NotificationCenter({ apiUrl = 'http://localhost:8000' }:
                         </h3>
                         <div className="flex items-center space-x-2">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(notification.priority)}`}>
-                            {notification.priority.toUpperCase()} ({notification.priority_score})
+                            {notification.priority?.toUpperCase() || 'NORMAL'} ({notification.priority_score || 0})
                           </span>
                           {notification.status === 'pending' && (
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

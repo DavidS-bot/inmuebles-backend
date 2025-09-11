@@ -246,8 +246,11 @@ class ViabilityStudy(SQLModel, table=True):
     # FINANCIACIÓN
     loan_amount: float
     down_payment: float = 0  # Equity/Depósito - calculado
+    loan_type: str = "fixed"  # "fixed" o "variable"
     interest_rate: float
     loan_term_years: int = 25
+    euribor_spread: Optional[float] = 0.015  # Diferencial sobre Euribor para préstamos variables
+    euribor_reset_vector: Optional[str] = None  # JSON string con vector de Euribor proyectado
     monthly_mortgage_payment: float = 0  # Calculado
     loan_to_value: float = 0  # LTV calculado
     

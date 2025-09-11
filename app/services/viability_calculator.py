@@ -1,4 +1,5 @@
 import math
+import json
 from typing import Dict, List, Tuple
 from datetime import datetime, date
 
@@ -14,6 +15,23 @@ def calculate_monthly_payment(loan_amount: float, annual_rate: float, years: int
                      ((1 + monthly_rate) ** num_payments - 1)
     
     return round(monthly_payment, 2)
+
+def calculate_variable_rate_payment(study) -> float:
+    """Calcular pago mensual inicial para préstamo variable"""
+    if study.loan_type == "variable" and study.euribor_reset_vector:
+        try:
+            # Obtener vector de Euribor
+            euribor_vector = json.loads(study.euribor_reset_vector) if isinstance(study.euribor_reset_vector, str) else study.euribor_reset_vector
+            
+            # Tipo inicial: Euribor actual + diferencial
+            initial_rate = (euribor_vector[0] / 100) + (study.euribor_spread or 0.015)
+            
+            return calculate_monthly_payment(study.loan_amount, initial_rate, study.loan_term_years)
+        except:
+            # Fallback al tipo fijo si hay error
+            return calculate_monthly_payment(study.loan_amount, study.interest_rate, study.loan_term_years)
+    else:
+        return calculate_monthly_payment(study.loan_amount, study.interest_rate, study.loan_term_years)
 
 def calculate_monthly_expenses(study) -> float:
     """Calcular gastos mensuales totales"""
@@ -80,11 +98,16 @@ def calculate_viability_metrics(study):
     # 2. CÁLCULOS DE FINANCIACIÓN
     study.down_payment = study.total_purchase_price - study.loan_amount
     study.loan_to_value = study.loan_amount / study.total_purchase_price if study.total_purchase_price > 0 else 0
-    study.monthly_mortgage_payment = calculate_monthly_payment(
-        study.loan_amount, 
-        study.interest_rate, 
-        study.loan_term_years
-    )
+    
+    # Calcular pago mensual según tipo de préstamo
+    if hasattr(study, 'loan_type') and study.loan_type == "variable":
+        study.monthly_mortgage_payment = calculate_variable_rate_payment(study)
+    else:
+        study.monthly_mortgage_payment = calculate_monthly_payment(
+            study.loan_amount, 
+            study.interest_rate, 
+            study.loan_term_years
+        )
     
     # 3. CÁLCULOS DE GASTOS
     monthly_expenses = calculate_monthly_expenses(study)

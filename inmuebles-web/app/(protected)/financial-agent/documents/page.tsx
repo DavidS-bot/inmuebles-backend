@@ -195,7 +195,7 @@ export default function DocumentsPage() {
                 <div className="flex justify-between items-start">
                   <p className="font-medium">{alert.message}</p>
                   <span className="text-xs px-2 py-1 rounded bg-white bg-opacity-50">
-                    {alert.priority.toUpperCase()}
+                    {alert.priority?.toUpperCase() || 'NORMAL'}
                   </span>
                 </div>
                 {alert.due_date && (

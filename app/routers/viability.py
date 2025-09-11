@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 from sqlmodel import Session, select
 from datetime import datetime
 from pydantic import BaseModel
+import json
 
 from ..models import ViabilityStudy, ViabilityProjection, User
 from ..deps import get_session, get_current_user
@@ -27,8 +28,11 @@ class ViabilityStudyCreate(BaseModel):
     
     # FINANCIACIÓN
     loan_amount: float
+    loan_type: str = "fixed"
     interest_rate: float
     loan_term_years: int = 25
+    euribor_spread: Optional[float] = 0.015
+    euribor_reset_vector: Optional[List[float]] = None
     
     # INGRESOS
     monthly_rent: float
@@ -57,6 +61,10 @@ async def create_viability_study(
         # Crear diccionario de datos desde el modelo Pydantic
         data_dict = study_data.dict()
         data_dict['user_id'] = current_user.id
+        
+        # Convertir vector de Euribor a JSON string si existe
+        if data_dict.get('euribor_reset_vector'):
+            data_dict['euribor_reset_vector'] = json.dumps(data_dict['euribor_reset_vector'])
         
         # Crear instancia del modelo SQLModel
         study = ViabilityStudy(**data_dict)

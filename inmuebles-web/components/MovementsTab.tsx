@@ -82,6 +82,19 @@ export default function MovementsTab() {
     loadData();
   }, [filters]);
 
+  // Configure auth token on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      console.log('🔑 Setting auth token in API defaults on component mount');
+      import('@/lib/api').then(({ setAuthToken }) => {
+        setAuthToken(token);
+      });
+    } else {
+      console.warn('⚠️ No auth token found in localStorage');
+    }
+  }, []);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -243,88 +256,113 @@ export default function MovementsTab() {
     setUpdatingBankinter(true);
     try {
       console.log('🏦 BANKINTER: Starting update process...');
-      const shouldRunRealScraper = confirm(
-        '🏦 SINCRONIZACIÓN BANKINTER\n\n' +
-        '¿Quieres ejecutar el scraper REAL que abre el navegador?\n\n' +
-        '✅ SÍ = Ejecutar scraper real (abre Chrome, descarga datos actuales)\n' +
-        '❌ NO = Solo mostrar datos ya existentes\n\n' +
-        'El scraper real tarda 2-3 minutos pero obtiene los datos más recientes.'
-      );
-
-      if (shouldRunRealScraper) {
-        alert('🏦 EJECUTANDO SCRAPER REAL\n\n' +
-              '1️⃣ Se abrirá una ventana del navegador\n' +
-              '2️⃣ Se conectará automáticamente a Bankinter\n' +
-              '3️⃣ Descargará tus movimientos más recientes\n' +
-              '4️⃣ Los subirá automáticamente\n\n' +
-              '⏰ Espera 2-3 minutos sin cerrar nada');
-        
-        // Ejecutar el script real de Python
-        try {
-          const result = await fetch('http://localhost:8003/run-scraper', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          if (result.ok) {
-            const data = await result.json();
-            alert(`✅ ¡Scraper completado!\n\nMovimientos nuevos: ${data.new_movements || 'N/A'}`);
-            await loadData();
-            return;
-          }
-        } catch (error) {
-          console.log('Local scraper not available, using fallback');
-        }
+      
+      // Verificar configuración de API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log('🔗 API URL configured:', apiUrl);
+      
+      if (!apiUrl) {
+        alert('❌ Error de configuración\n\nNo se ha configurado la URL del API.\nContacta con el administrador del sistema.');
+        return;
       }
       
-      console.log('🏦 BANKINTER: Using production endpoint');
+      // Verificar autenticación
+      const token = localStorage.getItem('auth_token');
+      console.log('🔑 Auth token present:', !!token);
+      
+      if (!token) {
+        alert('❌ Error de autenticación\n\nNo hay token de autenticación.\nPor favor, vuelve a iniciar sesión.');
+        window.location.href = '/login';
+        return;
+      }
+      
+      const shouldProceed = confirm(
+        '🏦 SINCRONIZACIÓN BANKINTER\n\n' +
+        'Se ejecutará el scraper automático que:\n\n' +
+        '🔐 Se conecta a tu cuenta Bankinter\n' +
+        '📥 Descarga movimientos recientes\n' +
+        '⚡ Los procesa automáticamente\n' +
+        '📊 Los añade a tu dashboard\n\n' +
+        '⏰ Proceso estimado: 2-3 minutos\n\n' +
+        '¿Continuar con la sincronización?'
+      );
+
+      if (!shouldProceed) {
+        console.log('🏦 BANKINTER: User cancelled');
+        return;
+      }
+
+      console.log('🏦 BANKINTER: User confirmed, starting sync...');
+      console.log('🏦 BANKINTER: Making API call to:', `${apiUrl}/integrations/bankinter/sync-now`);
+      
+      // Set auth token if not already set
+      if (token && !api.defaults.headers.common.Authorization) {
+        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+        console.log('🔑 Auth token set in API headers');
+      }
+      
       const response = await api.post('/integrations/bankinter/sync-now', {}, {
-        timeout: 30000
+        timeout: 180000,  // 3 minutes timeout
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       console.log('🏦 BANKINTER: API call completed, status:', response.status);
       
       const result = response.data;
+      console.log('🏦 BANKINTER: Response data:', result);
+      
+      // Mostrar mensaje de éxito inmediato
+      alert('✅ ¡Sincronización Bankinter iniciada con éxito!\n\n' +
+            '🔄 El proceso se está ejecutando en el servidor\n' +
+            '⏰ Duración estimada: 2-3 minutos\n' +
+            '📱 Verás los resultados cuando se complete\n\n' +
+            '💡 El navegador puede abrirse automáticamente en el servidor\n' +
+            '🔄 Los movimientos aparecerán aquí cuando terminen de procesarse');
       
       if (result.sync_status === 'started') {
-        let message = `✅ ¡Sincronización Bankinter iniciada!\n\n`;
-        message += `⏳ Estado: ${result.message || 'Procesando...'}\n`;
-        message += `⌛ Duración estimada: ${result.estimated_duration || '2-5 minutos'}\n`;
-        
-        if (result.notification) {
-          message += `\n📬 ${result.notification}`;
-        }
-        
-        message += `\n\n💡 El proceso se ejecuta automáticamente en segundo plano.`;
-        message += `\n🔄 La página se actualizará cuando termine la sincronización.`;
-        
-        alert(message);
+        console.log('🏦 BANKINTER: Async sync started');
         
         // Recargar datos después de un tiempo para ver los nuevos movimientos
         setTimeout(async () => {
+          console.log('🏦 BANKINTER: Checking for new data after delay...');
           await loadData();
-          alert('🔄 ¡Sincronización completada! Revisa los nuevos movimientos que se han añadido automáticamente.');
+          
+          // Verificar si hay movimientos nuevos comparando con la lista anterior
+          alert('🔄 Verificando nuevos movimientos...\n\n' +
+                'Si no ves movimientos nuevos:\n' +
+                '1️⃣ El proceso puede estar aún ejecutándose\n' +
+                '2️⃣ Espera 1-2 minutos más y actualiza la página\n' +
+                '3️⃣ O sube un extracto CSV manualmente');
         }, 120000); // Esperar 2 minutos antes de recargar
         
       } else {
+        console.log('🏦 BANKINTER: Direct sync response received');
+        
         // Manejar respuesta directa con movimientos
         const createdMovements = result.new_transactions || result.new_movements || result.created_movements || 0;
         const duplicatesSkipped = result.duplicate_transactions || result.duplicates_skipped || result.skipped_movements || 0;
         const totalProcessed = result.transactions_found || result.total_movements || result.total_processed || 0;
         
-        let message = `✅ ¡Sincronización Bankinter completada automáticamente!\n\n`;
+        let message = `✅ ¡Sincronización Bankinter completada!\n\n`;
         message += `📈 Movimientos nuevos: ${createdMovements}\n`;
         message += `🔄 Duplicados omitidos: ${duplicatesSkipped}\n`;
-        message += `📊 Total encontrados: ${totalProcessed}\n`;
+        message += `📊 Total procesados: ${totalProcessed}\n`;
         
         if (result.date_range) {
           message += `📅 Período: ${result.date_range}\n`;
         }
         
         if (createdMovements > 0) {
-          message += `\n🎉 ¡${createdMovements} nuevos movimientos sincronizados automáticamente!`;
+          message += `\n🎉 ¡${createdMovements} nuevos movimientos añadidos!`;
         } else {
-          message += `\nℹ️ Tu cuenta está actualizada. Todos los movimientos ya existían.`;
+          message += `\nℹ️ Tu cuenta está actualizada. No hay movimientos nuevos.`;
+        }
+        
+        if (result.message) {
+          message += `\n\n📋 Detalles: ${result.message}`;
         }
         
         alert(message);
@@ -340,16 +378,30 @@ export default function MovementsTab() {
         url: error?.config?.url
       });
       
-      let errorMessage = '❌ Error en conexión con Bankinter\n\n';
+      let errorMessage = '❌ Error en sincronización con Bankinter\n\n';
       
       if (error?.response?.status === 401) {
-        errorMessage += '🔐 Credenciales incorrectas. Verifica tu usuario y contraseña.';
+        errorMessage += '🔐 Credenciales incorrectas o sesión expirada.\n';
+        errorMessage += '💡 Prueba abrir Bankinter manualmente y luego volver a sincronizar.';
       } else if (error?.response?.status === 408 || error?.code === 'ECONNABORTED') {
-        errorMessage += '⏱️ Tiempo de espera agotado. La conexión bancaria tardó demasiado.';
+        errorMessage += '⏱️ Tiempo de espera agotado (3 minutos).\n';
+        errorMessage += '🔄 El proceso puede estar en progreso. Espera unos minutos y revisa si aparecen movimientos nuevos.';
+      } else if (error?.response?.status === 404) {
+        errorMessage += '🔧 Endpoint no encontrado. Contacta con soporte técnico.';
+      } else if (error?.response?.status >= 500) {
+        errorMessage += '🛠️ Error del servidor. El sistema está procesando tu solicitud.\n';
+        errorMessage += '⏰ Espera 2-3 minutos y revisa si los movimientos se sincronizaron automáticamente.';
       } else if (error?.response?.data?.detail) {
-        errorMessage += `📋 Detalles: ${error.response.data.detail}`;
+        errorMessage += `📋 Detalles técnicos: ${error.response.data.detail}`;
+      } else if (error?.message?.includes('Network Error')) {
+        errorMessage += '🌐 Error de conexión. Verifica tu conexión a internet.\n';
+        errorMessage += '🔄 Si el problema persiste, contacta con soporte.';
       } else {
-        errorMessage += '🔧 Error técnico en la sincronización. Inténtalo más tarde.';
+        errorMessage += '🔧 Error técnico en la sincronización.\n';
+        errorMessage += '💡 Opciones:\n';
+        errorMessage += '1️⃣ Abre Bankinter manualmente y verifica tu cuenta\n';
+        errorMessage += '2️⃣ Vuelve a intentar en unos minutos\n';
+        errorMessage += '3️⃣ Sube un extracto CSV manualmente como alternativa';
       }
       
       alert(errorMessage);
@@ -680,6 +732,13 @@ export default function MovementsTab() {
             className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {updatingBankinter ? '⏳ Actualizando...' : '🏦 Actualizar Bankinter'}
+          </button>
+          <button
+            onClick={() => window.open('https://empresas.bankinter.com/login', '_blank')}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            title="Abrir Bankinter en nueva pestaña"
+          >
+            🌐 Abrir Bankinter
           </button>
           <button
             onClick={handleExportToExcel}

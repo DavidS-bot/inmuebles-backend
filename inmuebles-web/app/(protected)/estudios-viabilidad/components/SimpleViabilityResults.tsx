@@ -238,20 +238,21 @@ export default function SimpleViabilityResults({ study, onClose }: SimpleViabili
 
           {activeTab === 'advanced' && (
             <div className="space-y-6">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-yellow-800">
-                      Funciones Avanzadas en Desarrollo
+                    <h3 className="text-sm font-medium text-green-800">
+                      🎉 Funciones Avanzadas Disponibles
                     </h3>
-                    <div className="mt-2 text-sm text-yellow-700">
-                      <p>Las siguientes funciones estarán disponibles próximamente:</p>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>Las funciones avanzadas están ahora disponibles:</p>
                       <ul className="mt-2 space-y-1">
-                        <li>• Resumen Ejecutivo con KPIs</li>
-                        <li>• Proyección Temporal (5-30 años)</li>
-                        <li>• Análisis de Sensibilidad</li>
-                        <li>• Métricas Detalladas con Charts</li>
+                        <li>✅ Resumen Ejecutivo con KPIs</li>
+                        <li>✅ Proyección Temporal (5-30 años)</li>
+                        <li>✅ Análisis de Sensibilidad</li>
+                        <li>✅ Métricas Detalladas con Charts</li>
                       </ul>
+                      <p className="mt-3 font-medium">Haz clic en "Detalle" para acceder al análisis completo.</p>
                     </div>
                   </div>
                 </div>

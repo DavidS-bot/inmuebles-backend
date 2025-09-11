@@ -21,8 +21,11 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
     
     // Financiación
     loan_amount: 0,
+    loan_type: 'fixed', // 'fixed' or 'variable'
     interest_rate: 0.035,
     loan_term_years: 25,
+    euribor_spread: 0.015, // Diferencial sobre Euribor para préstamos variables
+    euribor_reset_vector: [3.5, 3.2, 2.8, 2.5, 2.3, 2.1, 2.0, 1.9, 1.8, 1.8], // Vector de Euribor 12m proyectado
     
     // Ingresos
     monthly_rent: 0,
@@ -403,7 +406,105 @@ export default function ViabilityForm({ onClose, onStudyCreated }: ViabilityForm
                           <option value={40}>40 años</option>
                         </select>
                       </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Tipo de préstamo *
+                        </label>
+                        <select
+                          value={formData.loan_type}
+                          onChange={(e) => updateFormData('loan_type', e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="fixed">Tipo Fijo</option>
+                          <option value="variable">Tipo Variable (Euribor)</option>
+                        </select>
+                      </div>
                     </div>
+
+                    {/* Campos adicionales para préstamos variables */}
+                    {formData.loan_type === 'variable' && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 className="text-md font-medium text-blue-900 mb-3 flex items-center">
+                          <TrendingUp className="h-4 w-4 mr-2" />
+                          Configuración Préstamo Variable
+                        </h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                              Diferencial sobre Euribor 12M (%)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.001"
+                              min="0"
+                              max="0.1"
+                              value={formData.euribor_spread}
+                              onChange={(e) => updateFormData('euribor_spread', Number(e.target.value))}
+                              className="w-full border border-blue-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                              placeholder="0.015"
+                            />
+                            <p className="mt-1 text-xs text-blue-600">
+                              Actual: +{(formData.euribor_spread * 100).toFixed(2)}% sobre Euribor
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-blue-800 mb-2">
+                              Euribor 12M Actual (%)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.001"
+                              value={formData.euribor_reset_vector[0]}
+                              onChange={(e) => {
+                                const newVector = [...formData.euribor_reset_vector];
+                                newVector[0] = Number(e.target.value);
+                                updateFormData('euribor_reset_vector', newVector);
+                              }}
+                              className="w-full border border-blue-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                              placeholder="3.5"
+                            />
+                            <p className="mt-1 text-xs text-blue-600">
+                              Tipo inicial: {((formData.euribor_reset_vector[0] + formData.euribor_spread * 100)).toFixed(2)}%
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Vector de proyección Euribor */}
+                        <div>
+                          <label className="block text-sm font-medium text-blue-800 mb-2">
+                            Proyección Euribor 12M (próximos 10 años)
+                          </label>
+                          <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                            {formData.euribor_reset_vector.map((rate, index) => (
+                              <div key={index}>
+                                <label className="block text-xs text-blue-700 mb-1">
+                                  Año {index + 1}
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="10"
+                                  value={rate}
+                                  onChange={(e) => {
+                                    const newVector = [...formData.euribor_reset_vector];
+                                    newVector[index] = Number(e.target.value);
+                                    updateFormData('euribor_reset_vector', newVector);
+                                  }}
+                                  className="w-full border border-blue-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <p className="mt-2 text-xs text-blue-600">
+                            💡 Tip: Puedes usar datos del BCE o analistas financieros para proyectar la evolución del Euribor
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {preview.ltv > 0.8 && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

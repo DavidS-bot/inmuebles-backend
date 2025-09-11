@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, TrendingUp, AlertTriangle, FileText, Plus, Search, Filter } from 'lucide-react';
 import ViabilityForm from './components/ViabilityForm';
 import SimpleViabilityResults from './components/SimpleViabilityResults';
+import FixedEnhancedViabilityResults from './components/FixedEnhancedViabilityResults';
 import ViabilityComparison from './components/ViabilityComparison';
 
 interface ViabilityStudy {
@@ -348,7 +349,7 @@ export default function EstudiosViabilidad() {
       )}
 
       {activeStudy && (
-        <SimpleViabilityResults
+        <FixedEnhancedViabilityResults
           study={activeStudy}
           onClose={() => setActiveStudy(null)}
         />

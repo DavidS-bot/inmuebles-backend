@@ -355,7 +355,9 @@ def create_financial_movement(
     if not property_obj or property_obj.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Property not found")
     
-    movement = FinancialMovement(**movement_data.dict())
+    movement_dict = movement_data.dict()
+    movement_dict['user_id'] = current_user.id
+    movement = FinancialMovement(**movement_dict)
     session.add(movement)
     session.commit()
     session.refresh(movement)

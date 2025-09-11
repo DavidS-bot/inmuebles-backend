@@ -13,7 +13,8 @@ import {
   Bell,
   ArrowUpDown,
   PieChart,
-  Target
+  Target,
+  CreditCard
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { persistToken } from '@/lib/auth';
@@ -63,6 +64,13 @@ function getNavGroups(badgeData: Record<string, number>): NavGroup[] {
           href: '/financial-agent/movements',
           icon: ArrowUpDown,
           badge: badgeData.movements || 0
+        },
+        {
+          id: 'open-banking',
+          label: 'Open Banking',
+          href: '/financial-agent/open-banking',
+          icon: CreditCard,
+          badge: badgeData.openBanking || 0
         },
         {
           id: 'analytics',

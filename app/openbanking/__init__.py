@@ -1,0 +1,1 @@
+# Open Banking module for Nordigen integration

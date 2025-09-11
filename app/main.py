@@ -6,7 +6,7 @@ from .db import init_db, get_session
 from .deps import get_current_user
 from .routers import (
     properties, rules, movements, cashflow, auth,
-    financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local, viability
+    financial_movements, rental_contracts, mortgage_details, classification_rules, uploads, euribor_rates, analytics, mortgage_calculator, document_manager, notifications, tax_assistant, integrations, bank_integration, bankinter_v2, bankinter_simple, bankinter_real, payment_rules, bankinter_upload, bankinter_local, viability, openbanking_tink
 )
 
 app = FastAPI(title="Inmuebles API", version="0.1.1")
@@ -47,10 +47,18 @@ app.include_router(bankinter_upload.router)
 app.include_router(bankinter_local.router)
 app.include_router(payment_rules.router)
 app.include_router(viability.router)
+app.include_router(openbanking_tink.router)
 
 @app.on_event("startup")
 def on_startup():
     init_db()
+    # Inicializar scheduler de Open Banking (opcional)
+    try:
+        from .scheduler import start_scheduler
+        start_scheduler()
+    except Exception as e:
+        import logging
+        logging.warning(f"Could not start OpenBanking scheduler: {e}")
 
 @app.get("/health")
 def health():

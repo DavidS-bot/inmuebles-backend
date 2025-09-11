@@ -77,6 +77,11 @@ class FinancialMovement(SQLModel, table=True):
     is_classified: bool = True  # Si fue clasificado automáticamente
     bank_balance: Optional[float] = None  # Saldo después del movimiento
     
+    # Campos para integración bancaria
+    external_id: Optional[str] = None  # ID de la transacción en el banco (para evitar duplicados)
+    bank_account_id: Optional[str] = None  # ID de la cuenta bancaria origen
+    source: str = "manual"  # "manual", "nordigen", "bankinter", etc.
+    
     user: Optional[User] = Relationship()
     property: Optional[Property] = Relationship(back_populates="financial_movements")
 
@@ -175,26 +180,53 @@ class EuriborRate(SQLModel, table=True):
 class BankConnection(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
-    institution_id: str  # ID del banco en GoCardless
+    institution_id: str  # ID del banco en Nordigen/GoCardless
     institution_name: str  # Nombre del banco
-    requisition_id: str  # ID de la requisición de GoCardless
+    institution_logo: Optional[str] = None  # URL del logo del banco
+    institution_bic: Optional[str] = None  # BIC del banco
+    requisition_id: str  # ID de la requisición de Nordigen
+    requisition_reference: str  # Referencia única de la requisición
+    consent_status: str = "CR"  # CR, GC, UA, RJ, EX, GA, SA
+    consent_url: Optional[str] = None  # URL de consentimiento
+    consent_expires_at: Optional[datetime] = None
     is_active: bool = True
-    created_at: Optional[date] = None
-    last_sync: Optional[date] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_sync: Optional[datetime] = None
+    sync_status: str = "PENDING"  # PENDING, SYNCING, SUCCESS, ERROR
+    sync_error: Optional[str] = None
     
-    # Relación con cuentas bancarias
+    # Configuración de sincronización
+    auto_sync_enabled: bool = True
+    sync_frequency_hours: int = 24  # Frecuencia de sincronización en horas
+    
+    # Relaciones
+    user: Optional[User] = Relationship()
     bank_accounts: List["BankAccount"] = Relationship(back_populates="connection")
 
 class BankAccount(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     connection_id: int = Field(foreign_key="bankconnection.id")
-    account_id: str  # ID de la cuenta en GoCardless
+    account_id: str  # ID de la cuenta en Nordigen/GoCardless
     iban: Optional[str] = None
     account_name: Optional[str] = None
     account_type: Optional[str] = None  # "current", "savings", etc.
-    balance: Optional[float] = None
     currency: str = "EUR"
     is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Saldos actuales
+    available_balance: Optional[float] = None
+    current_balance: Optional[float] = None
+    credit_limit: Optional[float] = None
+    
+    # Información adicional
+    bic: Optional[str] = None
+    owner_name: Optional[str] = None
+    product_name: Optional[str] = None
+    
+    # Control de sincronización
+    last_transaction_sync: Optional[datetime] = None
+    sync_from_date: Optional[date] = None  # Desde qué fecha sincronizar
     
     connection: Optional[BankConnection] = Relationship(back_populates="bank_accounts")
 
